@@ -6,3 +6,6 @@
 
 # yoyo configs
 /**/yoyo*.ini
+
+# site-local startup scripts
+/run-*.sh
