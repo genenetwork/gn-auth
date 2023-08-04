@@ -62,7 +62,9 @@
  (propagated-inputs
   (list python-flask
 	python-authlib
+	python-pymonad
 	yoyo-migrations
+	python-bcrypt ;; remove after removing all references
 	python-argon2-cffi
 	python-email-validator))
  (home-page "https://github.com/genenetwork/gn-auth")
