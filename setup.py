@@ -3,7 +3,7 @@
 from setuptools import setup
 from setup_commands import RunTests
 
-long_description = """
+LONG_DESCRIPTION = """
 GeneNetwork-Auth project is the authentication/authorisation server to be used
 across all GeneNetwork services.
 """
@@ -28,7 +28,7 @@ setup(author="Frederick M. Muriithi",
       ],
       scripts=[],
       license="AGPLV3",
-      long_description=long_description,
+      long_description=LONG_DESCRIPTION,
       long_description_content_type="text/markdown",
       name="GeneNetwork-Auth",
       packages=[

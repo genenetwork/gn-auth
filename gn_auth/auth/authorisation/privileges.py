@@ -1,8 +1,8 @@
 """Handle privileges"""
 from typing import Any, Iterable, NamedTuple
 
-from gn3.auth import db
-from gn3.auth.authentication.users import User
+from gn_auth.auth import db
+from gn_auth.auth.authentication.users import User
 
 class Privilege(NamedTuple):
     """Class representing a privilege: creates immutable objects."""
