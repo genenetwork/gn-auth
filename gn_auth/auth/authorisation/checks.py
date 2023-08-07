@@ -4,7 +4,7 @@ from typing import Callable
 
 from flask import request, current_app as app
 
-from gn_auth.auth import db
+from gn_auth.auth.db import sqlite3 as db
 
 from . import privileges as auth_privs
 from .errors import InvalidData, AuthorisationError

@@ -4,7 +4,7 @@ from typing import Any, Optional
 from flask import current_app
 from pymonad.maybe import Nothing
 
-from gn_auth.auth import db
+from gn_auth.auth.db import sqlite3 as db
 from gn_auth.auth.authentication.oauth2.models.oauth2token import (
     OAuth2Token, token_by_access_token, token_by_refresh_token)
 

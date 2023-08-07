@@ -13,7 +13,7 @@ from yoyo import get_backend, read_migrations
 from gn_auth import migrations
 from gn_auth import create_app
 
-from gn_auth.auth import db
+from gn_auth.auth.db import sqlite3 as db
 from gn_auth.auth.authentication.users import hash_password
 
 from scripts import register_sys_admin as rsysadm# type: ignore[import]

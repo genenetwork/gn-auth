@@ -1,7 +1,7 @@
 """Fixtures and utilities for resource-related tests"""
 import pytest
 
-from gn_auth.auth import db
+from gn_auth.auth.db import sqlite3 as db
 
 from .group_fixtures import TEST_RESOURCES
 

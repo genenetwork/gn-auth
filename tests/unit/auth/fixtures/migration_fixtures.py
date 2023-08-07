@@ -4,7 +4,7 @@ from yoyo.backends import DatabaseBackend
 from yoyo import get_backend, read_migrations
 from yoyo.migrations import Migration, MigrationList
 
-from gn_auth.auth import db
+from gn_auth.auth.db import sqlite3 as db
 from gn_auth.migrations import apply_migrations, rollback_migrations
 
 @pytest.fixture(scope="session")

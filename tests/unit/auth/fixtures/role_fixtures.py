@@ -3,7 +3,7 @@ import uuid
 
 import pytest
 
-from gn_auth.auth import db
+from gn_auth.auth.db import sqlite3 as db
 from gn_auth.auth.authorisation.roles import Role
 from gn_auth.auth.authorisation.privileges import Privilege
 

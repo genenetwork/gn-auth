@@ -10,13 +10,13 @@ from MySQLdb.cursors import DictCursor
 from authlib.integrations.flask_oauth2.errors import _HTTPException
 from flask import request, jsonify, Response, Blueprint, current_app as app
 
-import gn_auth.db_utils as gn3db
+import gn_auth.auth.db.mariadb as gn3db
 from gn_auth import jobs
 from gn_auth.commands import run_async_cmd
 from gn_auth.db.traits import build_trait_name
 
-from gn_auth.auth import db
-from gn_auth.auth.db_utils import with_db_connection
+from gn_auth.auth.db import sqlite3 as db
+from gn_auth.auth.db.sqlite3 import with_db_connection
 
 from gn_auth.auth.authorisation.checks import require_json
 from gn_auth.auth.authorisation.errors import InvalidData, NotFoundError

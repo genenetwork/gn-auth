@@ -14,8 +14,8 @@ from flask import (
     render_template,
     current_app as app)
 
-from gn_auth.auth import db
-from gn_auth.auth.db_utils import with_db_connection
+from gn_auth.auth.db import sqlite3 as db
+from gn_auth.auth.db.sqlite3 import with_db_connection
 from gn_auth.auth.authorisation.errors import ForbiddenAccess
 
 from .resource_server import require_oauth

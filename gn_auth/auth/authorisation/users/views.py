@@ -7,9 +7,9 @@ import sqlite3
 from email_validator import validate_email, EmailNotValidError
 from flask import request, jsonify, Response, Blueprint, current_app
 
-from gn_auth.auth import db
+from gn_auth.auth.db import sqlite3 as db
 from gn_auth.auth.dictify import dictify
-from gn_auth.auth.db_utils import with_db_connection
+from gn_auth.auth.db.sqlite3 import with_db_connection
 
 from .models import list_users
 from .masquerade.views import masq

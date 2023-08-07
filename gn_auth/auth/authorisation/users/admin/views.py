@@ -18,8 +18,8 @@ from flask import (
 
 
 from gn_auth import session
-from gn_auth.auth import db
-from gn_auth.auth.db_utils import with_db_connection
+from gn_auth.auth.db import sqlite3 as db
+from gn_auth.auth.db.sqlite3 import with_db_connection
 
 from gn_auth.auth.authentication.oauth2.models.oauth2client import (
     save_client,

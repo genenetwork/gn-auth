@@ -5,7 +5,7 @@ import datetime
 
 import pytest
 
-from gn_auth.auth import db
+from gn_auth.auth.db import sqlite3 as db
 from gn_auth.auth.authentication.users import hash_password
 from gn_auth.auth.authentication.oauth2.models.oauth2client import OAuth2Client
 

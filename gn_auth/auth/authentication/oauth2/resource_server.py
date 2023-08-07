@@ -4,7 +4,7 @@ from flask import current_app as app
 from authlib.oauth2.rfc6750 import BearerTokenValidator as _BearerTokenValidator
 from authlib.integrations.flask_oauth2 import ResourceProtector
 
-from gn_auth.auth import db
+from gn_auth.auth.db import sqlite3 as db
 from gn_auth.auth.authentication.oauth2.models.oauth2token import token_by_access_token
 
 class BearerTokenValidator(_BearerTokenValidator):

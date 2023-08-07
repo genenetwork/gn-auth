@@ -5,13 +5,13 @@ from typing import Any, Iterable
 from MySQLdb.cursors import DictCursor
 
 import gn_auth.auth.db as authdb
-import gn_auth.db_utils as gn3db
+import gn_auth.auth.db.mariadb as gn3db
 from gn_auth.auth.dictify import dictify
 from gn_auth.auth.authorisation.checks import authorised_p
 from gn_auth.auth.authorisation.groups.models import Group
 
 def linked_phenotype_data(
-        authconn: authdb.DbConnection, gn3conn: gn3db.Connection,
+        authconn: authdb.DbConnection, gn3conn: gn3db.DbConnection,
         species: str = "") -> Iterable[dict[str, Any]]:
     """Retrieve phenotype data linked to user groups."""
     authkeys = ("SpeciesId", "InbredSetId", "PublishFreezeId", "PublishXRefId")
@@ -52,7 +52,7 @@ def linked_phenotype_data(
                   "group(s)."),
               oauth2_scope="profile group resource")
 def ungrouped_phenotype_data(
-        authconn: authdb.DbConnection, gn3conn: gn3db.Connection):
+        authconn: authdb.DbConnection, gn3conn: gn3db.DbConnection):
     """Retrieve phenotype data that is not linked to any user group."""
     with gn3conn.cursor() as cursor:
         params = tuple(
@@ -82,7 +82,7 @@ def ungrouped_phenotype_data(
 
     return tuple()
 
-def __traits__(gn3conn: gn3db.Connection, params: tuple[dict, ...]) -> tuple[dict, ...]:
+def __traits__(gn3conn: gn3db.DbConnection, params: tuple[dict, ...]) -> tuple[dict, ...]:
     """An internal utility function. Don't use outside of this module."""
     if len(params) < 1:
         return tuple()
@@ -115,7 +115,7 @@ def __traits__(gn3conn: gn3db.Connection, params: tuple[dict, ...]) -> tuple[dic
                   "group(s)."),
               oauth2_scope="profile group resource")
 def link_phenotype_data(
-        authconn:authdb.DbConnection, gn3conn: gn3db.Connection, group: Group,
+        authconn:authdb.DbConnection, gn3conn: gn3db.DbConnection, group: Group,
         traits: tuple[dict, ...]) -> dict:
     """Link phenotype traits to a user group."""
     with authdb.cursor(authconn) as cursor:

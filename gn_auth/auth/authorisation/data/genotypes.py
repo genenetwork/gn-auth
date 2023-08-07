@@ -5,7 +5,7 @@ from typing import Iterable
 from MySQLdb.cursors import DictCursor
 
 import gn_auth.auth.db as authdb
-import gn_auth.db_utils as gn3db
+import gn_auth.auth.db.mariadb as gn3db
 from gn_auth.auth.dictify import dictify
 from gn_auth.auth.authorisation.checks import authorised_p
 from gn_auth.auth.authorisation.groups.models import Group
@@ -22,7 +22,7 @@ def linked_genotype_data(conn: authdb.DbConnection) -> Iterable[dict]:
                   "group(s)."),
               oauth2_scope="profile group resource")
 def ungrouped_genotype_data(# pylint: disable=[too-many-arguments]
-        authconn: authdb.DbConnection, gn3conn: gn3db.Connection,
+        authconn: authdb.DbConnection, gn3conn: gn3db.DbConnection,
         search_query: str, selected: tuple[dict, ...] = tuple(),
         limit: int = 10000, offset: int = 0) -> tuple[
             dict, ...]:

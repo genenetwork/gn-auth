@@ -5,7 +5,7 @@ from typing import NamedTuple
 
 from pymonad.maybe import Just, Maybe, Nothing
 
-from gn_auth.auth import db
+from gn_auth.auth.db import sqlite3 as db
 
 from .oauth2client import OAuth2Client
 

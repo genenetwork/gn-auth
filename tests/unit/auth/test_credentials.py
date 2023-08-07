@@ -3,7 +3,7 @@ import pytest
 from yoyo.migrations import MigrationList
 from hypothesis import given, settings, strategies, HealthCheck
 
-from gn_auth.auth import db
+from gn_auth.auth.db import sqlite3 as db
 from gn_auth.auth.authentication import credentials_in_database
 from gn_auth.migrations import get_migration, apply_migrations, rollback_migrations
 

@@ -5,7 +5,7 @@ from typing import NamedTuple, Optional
 
 from pymonad.maybe import Just, Maybe, Nothing
 
-from gn_auth.auth import db
+from gn_auth.auth.db import sqlite3 as db
 from gn_auth.auth.authentication.users import User, user_by_id
 
 from gn_auth.auth.authorisation.errors import NotFoundError

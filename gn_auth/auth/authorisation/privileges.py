@@ -1,7 +1,7 @@
 """Handle privileges"""
 from typing import Any, Iterable, NamedTuple
 
-from gn_auth.auth import db
+from gn_auth.auth.db import sqlite3 as db
 from gn_auth.auth.authentication.users import User
 
 class Privilege(NamedTuple):

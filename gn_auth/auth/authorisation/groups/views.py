@@ -7,11 +7,11 @@ from functools import partial
 from MySQLdb.cursors import DictCursor
 from flask import request, jsonify, Response, Blueprint, current_app
 
-from gn_auth.auth import db
-from gn_auth import db_utils as gn3db
+from gn_auth.auth.db import sqlite3 as db
+from gn_auth.auth.db import mariadb as gn3db
 
 from gn_auth.auth.dictify import dictify
-from gn_auth.auth.db_utils import with_db_connection
+from gn_auth.auth.db.sqlite3 import with_db_connection
 
 from .data import link_data_to_group
 from .models import (
@@ -169,7 +169,7 @@ def unlinked_genotype_data(
         return tuple(dict(row) for row in cursor.fetchall())
 
 def unlinked_phenotype_data(
-        authconn: db.DbConnection, gn3conn: gn3db.Connection,
+        authconn: db.DbConnection, gn3conn: gn3db.DbConnection,
         group: Group) -> tuple[dict, ...]:
     """
     Retrieve all phenotype data linked to a group but not linked to any

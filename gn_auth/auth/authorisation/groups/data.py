@@ -1,14 +1,14 @@
 """Handles the resource objects' data."""
 from MySQLdb.cursors import DictCursor
 
-from gn_auth import db_utils as gn3db
-from gn_auth.auth import db as authdb
+from gn_auth.auth.db import mariadb as gn3db
+from gn_auth.auth.db import sqlite3 as authdb
 from gn_auth.auth.authorisation.groups import Group
 from gn_auth.auth.authorisation.checks import authorised_p
 from gn_auth.auth.authorisation.errors import NotFoundError
 
 def __fetch_mrna_data_by_ids__(
-        conn: gn3db.Connection, dataset_ids: tuple[str, ...]) -> tuple[
+        conn: gn3db.DbConnection, dataset_ids: tuple[str, ...]) -> tuple[
             dict, ...]:
     """Fetch mRNA Assay data by ID."""
     with conn.cursor(DictCursor) as cursor:
@@ -26,7 +26,7 @@ def __fetch_mrna_data_by_ids__(
         raise NotFoundError("Could not find mRNA Assay data with the given ID.")
 
 def __fetch_geno_data_by_ids__(
-        conn: gn3db.Connection, dataset_ids: tuple[str, ...]) -> tuple[
+        conn: gn3db.DbConnection, dataset_ids: tuple[str, ...]) -> tuple[
             dict, ...]:
     """Fetch genotype data by ID."""
     with conn.cursor(DictCursor) as cursor:
@@ -44,7 +44,7 @@ def __fetch_geno_data_by_ids__(
         raise NotFoundError("Could not find Genotype data with the given ID.")
 
 def __fetch_pheno_data_by_ids__(
-        conn: gn3db.Connection, dataset_ids: tuple[str, ...]) -> tuple[
+        conn: gn3db.DbConnection, dataset_ids: tuple[str, ...]) -> tuple[
             dict, ...]:
     """Fetch phenotype data by ID."""
     with conn.cursor(DictCursor) as cursor:
@@ -66,7 +66,7 @@ def __fetch_pheno_data_by_ids__(
             "Could not find Phenotype/Publish data with the given IDs.")
 
 def __fetch_data_by_id(
-        conn: gn3db.Connection, dataset_type: str,
+        conn: gn3db.DbConnection, dataset_type: str,
         dataset_ids: tuple[str, ...]) -> tuple[dict, ...]:
     """Fetch data from MySQL by IDs."""
     fetch_fns = {
@@ -82,7 +82,7 @@ def __fetch_data_by_id(
                   "group(s)."),
               oauth2_scope="profile group resource")
 def link_data_to_group(
-        authconn: authdb.DbConnection, gn3conn: gn3db.Connection,
+        authconn: authdb.DbConnection, gn3conn: gn3db.DbConnection,
         dataset_type: str, dataset_ids: tuple[str, ...], group: Group) -> tuple[
             dict, ...]:
     """Link the given data to the specified group."""

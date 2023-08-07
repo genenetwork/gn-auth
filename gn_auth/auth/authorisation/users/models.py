@@ -2,7 +2,7 @@
 import uuid
 from functools import reduce
 
-from gn_auth.auth import db
+from gn_auth.auth.db import sqlite3 as db
 from gn_auth.auth.authorisation.roles.models import Role
 from gn_auth.auth.authorisation.checks import authorised_p
 from gn_auth.auth.authorisation.privileges import Privilege

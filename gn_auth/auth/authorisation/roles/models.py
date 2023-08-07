@@ -5,7 +5,7 @@ from typing import Any, Sequence, Iterable, NamedTuple
 
 from pymonad.either import Left, Right, Either
 
-from gn_auth.auth import db
+from gn_auth.auth.db import sqlite3 as db
 from gn_auth.auth.dictify import dictify
 from gn_auth.auth.authentication.users import User
 from gn_auth.auth.authorisation.errors import AuthorisationError

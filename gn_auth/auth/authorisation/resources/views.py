@@ -6,7 +6,7 @@ from functools import reduce
 
 from flask import request, jsonify, Response, Blueprint, current_app as app
 
-from gn_auth.auth.db_utils import with_db_connection
+from gn_auth.auth.db.sqlite3 import with_db_connection
 
 from .checks import authorised_for
 from .models import (
