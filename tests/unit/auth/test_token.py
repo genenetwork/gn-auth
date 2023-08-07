@@ -53,7 +53,7 @@ def test_token(fxtr_app, fxtr_oauth2_clients, test_data, expected):
         "username": email, "password": password}
 
     with fxtr_app.test_client() as client, db.cursor(conn) as cursor:
-        res = client.post("/api/oauth2/token", data=data)
+        res = client.post("/auth/token", data=data)
         # cleanup db
         cursor.execute("DELETE FROM oauth2_tokens WHERE access_token=?",
                        (gen_token(None, None, None, None),))

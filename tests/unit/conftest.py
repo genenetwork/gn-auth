@@ -5,7 +5,7 @@ from tempfile import TemporaryDirectory
 
 import pytest
 
-from gn_auth.app import create_app
+from gn_auth import create_app
 
 @pytest.fixture(scope="session")
 def fxtr_app():
@@ -16,7 +16,8 @@ def fxtr_app():
             f'testdb_{datetime.now().strftime("%Y%m%dT%H%M%S")}')
         app = create_app({
             "TESTING": True, "AUTH_DB": testdb,
-            "OAUTH2_ACCESS_TOKEN_GENERATOR": "tests.unit.auth.test_token.gen_token"
+            "OAUTH2_ACCESS_TOKEN_GENERATOR": "tests.unit.auth.test_token.gen_token",
+            "SECRET_KEY": "qQIrgiK29kXZU6v8D09y4uw_sk8I4cqgNZniYUrRoUk"
         })
         app.testing = True
         yield app

@@ -16,6 +16,7 @@
 
   #:use-module (gnu packages python-web)
   #:use-module (gnu packages python-xyz)
+  #:use-module (gnu packages python-check)
   #:use-module (gnu packages python-crypto)
 
   #:use-module (gnu packages databases)
@@ -85,8 +86,12 @@
  (build-system python-build-system)
  ;; (inputs (list))
  (native-inputs
-  (list python-pytest
-	python-pylint))
+  (list python-mypy
+	python-pytest
+	python-pylint
+	python-hypothesis
+	python-pytest-mock
+        python-mypy-extensions))
  (propagated-inputs
   (list python-flask
 	python-redis

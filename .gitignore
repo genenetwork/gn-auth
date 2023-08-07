@@ -1,5 +1,6 @@
 # python temp files and cache
 /**/__pycache__
+/**/.hypothesis
 
 # emacs temporary files
 /**/*~
