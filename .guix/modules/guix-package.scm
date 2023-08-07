@@ -5,6 +5,7 @@
   #:use-module ((guix licenses) #:prefix license:)
 
   #:use-module (git oid)
+  #:use-module (git tag)
   #:use-module (git bindings)
   #:use-module (git reference)
   #:use-module (git repository)
@@ -37,10 +38,37 @@
 	       commit))
       "NOTAREPOSITORY"))
 
+(define (list-last lst)
+  (let ((len (length lst)))
+    (if (> len 0)
+	(list-ref lst (- len 1)))))
+
+(define (process-version repo-head tag-vals)
+  (let ((version-prefix (list-last (string-split (car tag-vals) #\/)))
+	(repo-head-str (oid->string repo-head)))
+    (if (zero? (oid-cmp  repo-head
+			 (tag-target-id (cdr tag-vals))))
+	version-prefix
+	(string-append version-prefix "-" (substring repo-head-str 0 8)))))
+
 (define (get-latest-version)
   "Get latest version tag from repository."
-  ;; TODO: Implement
-  "v0.0.0")
+  (let ((%repo #f)
+	(%tags (list))
+	(%repo-head #f))
+    (begin (libgit2-init!)
+	   (set! %repo (repository-open %source-dir))
+	   (set! %repo-head (reference-target (repository-head %repo)))
+	   (tag-foreach %repo
+			(lambda (tname tref)
+			  (set! %tags (list (cons tname (tag-lookup %repo tref))))
+			  0))
+	   (libgit2-shutdown!)
+	   (if (zero? (length %tags))
+	       (string-append "v0.0.0-" (substring (oid->string %repo-head) 0 8))
+	       (process-version
+		%repo-head
+		(list-last (sort-list %tags (lambda (item) (error item)))))))))
 
 (define vcs-file?
   (or (git-predicate %source-dir)
