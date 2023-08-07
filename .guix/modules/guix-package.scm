@@ -61,10 +61,12 @@
 	python-pylint))
  (propagated-inputs
   (list python-flask
+	python-redis
 	python-authlib
 	python-pymonad
 	yoyo-migrations
 	python-bcrypt ;; remove after removing all references
+	python-mysqlclient
 	python-argon2-cffi
 	python-email-validator))
  (home-page "https://github.com/genenetwork/gn-auth")
