@@ -11,9 +11,9 @@ from authlib.integrations.flask_oauth2.errors import _HTTPException
 from flask import request, jsonify, Response, Blueprint, current_app as app
 
 import gn_auth.auth.db.mariadb as gn3db
+
 from gn_auth import jobs
 from gn_auth.commands import run_async_cmd
-from gn_auth.db.traits import build_trait_name
 
 from gn_auth.auth.db import sqlite3 as db
 from gn_auth.auth.db.sqlite3 import with_db_connection
@@ -38,6 +38,34 @@ from gn_auth.auth.authorisation.data.genotypes import (
     link_genotype_data, ungrouped_genotype_data)
 
 data = Blueprint("data", __name__)
+
+def build_trait_name(trait_fullname):
+    """
+    Initialises the trait's name, and other values from the search data provided
+
+    This is a copy of `gn3.db.traits.build_trait_name` function.
+    """
+    def dataset_type(dset_name):
+        if dset_name.find('Temp') >= 0:
+            return "Temp"
+        if dset_name.find('Geno') >= 0:
+            return "Geno"
+        if dset_name.find('Publish') >= 0:
+            return "Publish"
+        return "ProbeSet"
+
+    name_parts = trait_fullname.split("::")
+    assert len(name_parts) >= 2, f"Name format error: '{trait_fullname}'"
+    dataset_name = name_parts[0]
+    dataset_type = dataset_type(dataset_name)
+    return {
+        "db": {
+            "dataset_name": dataset_name,
+            "dataset_type": dataset_type},
+        "trait_fullname": trait_fullname,
+        "trait_name": name_parts[1],
+        "cellid": name_parts[2] if len(name_parts) == 3 else ""
+    }
 
 @data.route("species")
 def list_species() -> Response:
