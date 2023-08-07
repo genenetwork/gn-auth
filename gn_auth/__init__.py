@@ -6,6 +6,11 @@ from flask import Flask
 
 from . import settings
 
+from gn_auth.auth import oauth2
+from gn_auth.misc_views import misc
+
+from gn_auth.auth.authentication.oauth2.server import setup_oauth2_server
+
 class ConfigurationError(Exception):
     """Raised in case of a configuration error."""
 
@@ -61,5 +66,10 @@ def create_app(config: dict = {}) -> Flask:
     check_mandatory_settings(app)
 
     setup_logging_handlers(app)
+    setup_oauth2_server(app)
+
+    ## Blueprints
+    app.register_blueprint(misc, url_prefix="/")
+    app.register_blueprint(oauth2, url_prefix="/auth")
 
     return app
