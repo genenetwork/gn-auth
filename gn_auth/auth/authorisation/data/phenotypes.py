@@ -4,11 +4,11 @@ from typing import Any, Iterable
 
 from MySQLdb.cursors import DictCursor
 
-import gn3.auth.db as authdb
-import gn3.db_utils as gn3db
-from gn3.auth.dictify import dictify
-from gn3.auth.authorisation.checks import authorised_p
-from gn3.auth.authorisation.groups.models import Group
+import gn_auth.auth.db as authdb
+import gn_auth.db_utils as gn3db
+from gn_auth.auth.dictify import dictify
+from gn_auth.auth.authorisation.checks import authorised_p
+from gn_auth.auth.authorisation.groups.models import Group
 
 def linked_phenotype_data(
         authconn: authdb.DbConnection, gn3conn: gn3db.Connection,

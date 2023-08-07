@@ -3,9 +3,9 @@ import pytest
 from yoyo.migrations import MigrationList
 from hypothesis import given, settings, strategies, HealthCheck
 
-from gn3.auth import db
-from gn3.auth.authentication import credentials_in_database
-from gn3.migrations import get_migration, apply_migrations, rollback_migrations
+from gn_auth.auth import db
+from gn_auth.auth.authentication import credentials_in_database
+from gn_auth.migrations import get_migration, apply_migrations, rollback_migrations
 
 from tests.unit.auth.conftest import migrations_up_to
 

@@ -9,9 +9,9 @@ from flask import current_app as app
 from authlib.oauth2.rfc6749 import grants
 from authlib.oauth2.rfc7636 import create_s256_code_challenge
 
-from gn3.auth import db
-from gn3.auth.db_utils import with_db_connection
-from gn3.auth.authentication.users import User
+from gn_auth.auth import db
+from gn_auth.auth.db_utils import with_db_connection
+from gn_auth.auth.authentication.users import User
 
 from ..models.oauth2client import OAuth2Client
 from ..models.authorization_code import (

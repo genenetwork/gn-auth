@@ -14,9 +14,9 @@ from flask import (
     render_template,
     current_app as app)
 
-from gn3.auth import db
-from gn3.auth.db_utils import with_db_connection
-from gn3.auth.authorisation.errors import ForbiddenAccess
+from gn_auth.auth import db
+from gn_auth.auth.db_utils import with_db_connection
+from gn_auth.auth.authorisation.errors import ForbiddenAccess
 
 from .resource_server import require_oauth
 from .endpoints.revocation import RevocationEndpoint

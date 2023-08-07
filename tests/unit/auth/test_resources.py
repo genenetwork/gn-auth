@@ -3,11 +3,11 @@ import uuid
 
 import pytest
 
-from gn3.auth import db
+from gn_auth.auth import db
 
-from gn3.auth.authorisation.groups import Group
-from gn3.auth.authorisation.errors import AuthorisationError
-from gn3.auth.authorisation.resources.models import (
+from gn_auth.auth.authorisation.groups import Group
+from gn_auth.auth.authorisation.errors import AuthorisationError
+from gn_auth.auth.authorisation.resources.models import (
     Resource, user_resources, create_resource, ResourceCategory,
     public_resources)
 
@@ -33,8 +33,8 @@ uuid_fn = lambda : uuid.UUID("d32611e3-07fc-4564-b56c-786c6db6de2b")
             "test_resource", resource_category, False),))))
 def test_create_resource(mocker, fxtr_users_in_group, user, expected):
     """Test that resource creation works as expected."""
-    mocker.patch("gn3.auth.authorisation.resources.models.uuid4", uuid_fn)
-    mocker.patch("gn3.auth.authorisation.checks.require_oauth.acquire",
+    mocker.patch("gn_auth.auth.authorisation.resources.models.uuid4", uuid_fn)
+    mocker.patch("gn_auth.auth.authorisation.checks.require_oauth.acquire",
                  conftest.get_tokeniser(user))
     conn, _group, _users = fxtr_users_in_group
     resource = create_resource(
@@ -63,8 +63,8 @@ def test_create_resource(mocker, fxtr_users_in_group, user, expected):
 def test_create_resource_raises_for_unauthorised_users(
         mocker, fxtr_users_in_group, user, expected):
     """Test that resource creation works as expected."""
-    mocker.patch("gn3.auth.authorisation.resources.models.uuid4", uuid_fn)
-    mocker.patch("gn3.auth.authorisation.checks.require_oauth.acquire",
+    mocker.patch("gn_auth.auth.authorisation.resources.models.uuid4", uuid_fn)
+    mocker.patch("gn_auth.auth.authorisation.checks.require_oauth.acquire",
                  conftest.get_tokeniser(user))
     conn, _group, _users = fxtr_users_in_group
     with pytest.raises(AuthorisationError):

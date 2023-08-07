@@ -2,7 +2,7 @@
 
 import pytest
 
-from gn3.auth import db
+from gn_auth.auth import db
 
 SUCCESS_RESULT = {
     "status_code": 200,

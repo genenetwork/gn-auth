@@ -10,31 +10,31 @@ from MySQLdb.cursors import DictCursor
 from authlib.integrations.flask_oauth2.errors import _HTTPException
 from flask import request, jsonify, Response, Blueprint, current_app as app
 
-import gn3.db_utils as gn3db
-from gn3 import jobs
-from gn3.commands import run_async_cmd
-from gn3.db.traits import build_trait_name
+import gn_auth.db_utils as gn3db
+from gn_auth import jobs
+from gn_auth.commands import run_async_cmd
+from gn_auth.db.traits import build_trait_name
 
-from gn3.auth import db
-from gn3.auth.db_utils import with_db_connection
+from gn_auth.auth import db
+from gn_auth.auth.db_utils import with_db_connection
 
-from gn3.auth.authorisation.checks import require_json
-from gn3.auth.authorisation.errors import InvalidData, NotFoundError
+from gn_auth.auth.authorisation.checks import require_json
+from gn_auth.auth.authorisation.errors import InvalidData, NotFoundError
 
-from gn3.auth.authorisation.groups.models import group_by_id
+from gn_auth.auth.authorisation.groups.models import group_by_id
 
-from gn3.auth.authorisation.users.models import user_resource_roles
+from gn_auth.auth.authorisation.users.models import user_resource_roles
 
-from gn3.auth.authorisation.resources.checks import authorised_for
-from gn3.auth.authorisation.resources.models import (
+from gn_auth.auth.authorisation.resources.checks import authorised_for
+from gn_auth.auth.authorisation.resources.models import (
     user_resources, public_resources, attach_resources_data)
 
-from gn3.auth.authentication.users import User
-from gn3.auth.authentication.oauth2.resource_server import require_oauth
+from gn_auth.auth.authentication.users import User
+from gn_auth.auth.authentication.oauth2.resource_server import require_oauth
 
-from gn3.auth.authorisation.data.phenotypes import link_phenotype_data
-from gn3.auth.authorisation.data.mrna import link_mrna_data, ungrouped_mrna_data
-from gn3.auth.authorisation.data.genotypes import (
+from gn_auth.auth.authorisation.data.phenotypes import link_phenotype_data
+from gn_auth.auth.authorisation.data.mrna import link_mrna_data, ungrouped_mrna_data
+from gn_auth.auth.authorisation.data.genotypes import (
     link_genotype_data, ungrouped_genotype_data)
 
 data = Blueprint("data", __name__)

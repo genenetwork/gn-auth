@@ -6,7 +6,7 @@ from flask import request as flask_request
 from authlib.oauth2.rfc7662 import (
     IntrospectionEndpoint as _IntrospectionEndpoint)
 
-from gn3.auth.authentication.oauth2.models.oauth2token import OAuth2Token
+from gn_auth.auth.authentication.oauth2.models.oauth2token import OAuth2Token
 
 from .utilities import query_token as _query_token
 

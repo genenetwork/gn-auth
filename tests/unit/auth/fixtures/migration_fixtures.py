@@ -4,8 +4,8 @@ from yoyo.backends import DatabaseBackend
 from yoyo import get_backend, read_migrations
 from yoyo.migrations import Migration, MigrationList
 
-from gn3.auth import db
-from gn3.migrations import apply_migrations, rollback_migrations
+from gn_auth.auth import db
+from gn_auth.migrations import apply_migrations, rollback_migrations
 
 @pytest.fixture(scope="session")
 def auth_testdb_path(fxtr_app_config): # pylint: disable=redefined-outer-name

@@ -3,9 +3,9 @@ import uuid
 
 import pytest
 
-from gn3.auth import db
-from gn3.auth.authorisation.groups import Group, GroupRole
-from gn3.auth.authorisation.resources import Resource, ResourceCategory
+from gn_auth.auth import db
+from gn_auth.auth.authorisation.groups import Group, GroupRole
+from gn_auth.auth.authorisation.resources import Resource, ResourceCategory
 
 from .role_fixtures import RESOURCE_EDITOR_ROLE, RESOURCE_READER_ROLE
 

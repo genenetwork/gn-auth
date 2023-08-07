@@ -8,7 +8,7 @@ from authlib.oauth2.rfc6749.errors import InvalidClientError
 from authlib.integrations.flask_oauth2 import AuthorizationServer
 # from authlib.oauth2.rfc7636 import CodeChallenge
 
-from gn3.auth import db
+from gn_auth.auth import db
 
 from .models.oauth2client import client
 from .models.oauth2token import OAuth2Token, save_token

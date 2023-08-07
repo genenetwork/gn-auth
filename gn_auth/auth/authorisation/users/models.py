@@ -2,12 +2,12 @@
 import uuid
 from functools import reduce
 
-from gn3.auth import db
-from gn3.auth.authorisation.roles.models import Role
-from gn3.auth.authorisation.checks import authorised_p
-from gn3.auth.authorisation.privileges import Privilege
+from gn_auth.auth import db
+from gn_auth.auth.authorisation.roles.models import Role
+from gn_auth.auth.authorisation.checks import authorised_p
+from gn_auth.auth.authorisation.privileges import Privilege
 
-from gn3.auth.authentication.users import User
+from gn_auth.auth.authentication.users import User
 
 @authorised_p(
     ("system:user:list",),

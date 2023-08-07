@@ -3,7 +3,7 @@ import uuid
 import datetime
 from contextlib import contextmanager
 
-from gn3.auth.authentication.oauth2.models.oauth2token import OAuth2Token
+from gn_auth.auth.authentication.oauth2.models.oauth2token import OAuth2Token
 
 from .fixtures import * # pylint: disable=[wildcard-import,unused-wildcard-import]
 

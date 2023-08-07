@@ -3,8 +3,8 @@ Test that the `resource_categories` table is initialised with the startup data.
 """
 import pytest
 
-from gn3.auth import db
-from gn3.migrations import get_migration, apply_migrations, rollback_migrations
+from gn_auth.auth import db
+from gn_auth.migrations import get_migration, apply_migrations, rollback_migrations
 from tests.unit.auth.conftest import (
     apply_single_migration, rollback_single_migration, migrations_up_to)
 

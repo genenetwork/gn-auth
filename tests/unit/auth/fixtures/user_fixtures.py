@@ -3,8 +3,8 @@ import uuid
 
 import pytest
 
-from gn3.auth import db
-from gn3.auth.authentication.users import User, hash_password
+from gn_auth.auth import db
+from gn_auth.auth.authentication.users import User, hash_password
 
 TEST_USERS = (
         User(uuid.UUID("ecb52977-3004-469e-9428-2a1856725c7f"), "group@lead.er",

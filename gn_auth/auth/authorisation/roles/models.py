@@ -5,10 +5,10 @@ from typing import Any, Sequence, Iterable, NamedTuple
 
 from pymonad.either import Left, Right, Either
 
-from gn3.auth import db
-from gn3.auth.dictify import dictify
-from gn3.auth.authentication.users import User
-from gn3.auth.authorisation.errors import AuthorisationError
+from gn_auth.auth import db
+from gn_auth.auth.dictify import dictify
+from gn_auth.auth.authentication.users import User
+from gn_auth.auth.authorisation.errors import AuthorisationError
 
 from ..checks import authorised_p
 from ..privileges import Privilege

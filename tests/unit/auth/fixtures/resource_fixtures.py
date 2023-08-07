@@ -1,7 +1,7 @@
 """Fixtures and utilities for resource-related tests"""
 import pytest
 
-from gn3.auth import db
+from gn_auth.auth import db
 
 from .group_fixtures import TEST_RESOURCES
 

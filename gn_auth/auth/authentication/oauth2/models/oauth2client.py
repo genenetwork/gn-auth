@@ -6,10 +6,10 @@ from typing import Sequence, Optional, NamedTuple
 
 from pymonad.maybe import Just, Maybe, Nothing
 
-from gn3.auth import db
-from gn3.auth.authentication.users import User, users, user_by_id, same_password
+from gn_auth.auth import db
+from gn_auth.auth.authentication.users import User, users, user_by_id, same_password
 
-from gn3.auth.authorisation.errors import NotFoundError
+from gn_auth.auth.authorisation.errors import NotFoundError
 
 class OAuth2Client(NamedTuple):
     """

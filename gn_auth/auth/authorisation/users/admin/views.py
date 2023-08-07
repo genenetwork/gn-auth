@@ -17,17 +17,17 @@ from flask import (
     render_template)
 
 
-from gn3 import session
-from gn3.auth import db
-from gn3.auth.db_utils import with_db_connection
+from gn_auth import session
+from gn_auth.auth import db
+from gn_auth.auth.db_utils import with_db_connection
 
-from gn3.auth.authentication.oauth2.models.oauth2client import (
+from gn_auth.auth.authentication.oauth2.models.oauth2client import (
     save_client,
     OAuth2Client,
     oauth2_clients,
     client as oauth2_client,
     delete_client as _delete_client)
-from gn3.auth.authentication.users import (
+from gn_auth.auth.authentication.users import (
     User,
     user_by_id,
     valid_login,

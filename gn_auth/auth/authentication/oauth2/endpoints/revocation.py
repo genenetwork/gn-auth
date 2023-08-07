@@ -3,8 +3,8 @@
 from flask import current_app
 from authlib.oauth2.rfc7009 import RevocationEndpoint as _RevocationEndpoint
 
-from gn3.auth import db
-from gn3.auth.authentication.oauth2.models.oauth2token import (
+from gn_auth.auth import db
+from gn_auth.auth.authentication.oauth2.models.oauth2token import (
     save_token, OAuth2Token, revoke_token)
 
 from .utilities import query_token as _query_token

@@ -3,9 +3,9 @@ import uuid
 
 import pytest
 
-from gn3.auth import db
-from gn3.auth.authorisation.roles import Role
-from gn3.auth.authorisation.privileges import Privilege
+from gn_auth.auth import db
+from gn_auth.auth.authorisation.roles import Role
+from gn_auth.auth.authorisation.privileges import Privilege
 
 RESOURCE_READER_ROLE = Role(
     uuid.UUID("c3ca2507-ee24-4835-9b31-8c21e1c072d3"), "resource_reader", True,

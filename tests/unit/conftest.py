@@ -5,7 +5,7 @@ from tempfile import TemporaryDirectory
 
 import pytest
 
-from gn3.app import create_app
+from gn_auth.app import create_app
 
 @pytest.fixture(scope="session")
 def fxtr_app():

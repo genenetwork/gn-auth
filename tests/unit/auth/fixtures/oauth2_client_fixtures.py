@@ -5,9 +5,9 @@ import datetime
 
 import pytest
 
-from gn3.auth import db
-from gn3.auth.authentication.users import hash_password
-from gn3.auth.authentication.oauth2.models.oauth2client import OAuth2Client
+from gn_auth.auth import db
+from gn_auth.auth.authentication.users import hash_password
+from gn_auth.auth.authentication.oauth2.models.oauth2client import OAuth2Client
 
 @pytest.fixture(autouse=True)
 def fxtr_patch_envvars(monkeypatch):

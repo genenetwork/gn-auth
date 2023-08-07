@@ -4,8 +4,8 @@ from flask import current_app as app
 from authlib.oauth2.rfc6750 import BearerTokenValidator as _BearerTokenValidator
 from authlib.integrations.flask_oauth2 import ResourceProtector
 
-from gn3.auth import db
-from gn3.auth.authentication.oauth2.models.oauth2token import token_by_access_token
+from gn_auth.auth import db
+from gn_auth.auth.authentication.oauth2.models.oauth2token import token_by_access_token
 
 class BearerTokenValidator(_BearerTokenValidator):
     """Extends `authlib.oauth2.rfc6750.BearerTokenValidator`"""

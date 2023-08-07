@@ -1,8 +1,8 @@
 """Test the privileges module"""
 import pytest
 
-from gn3.auth import db
-from gn3.auth.authorisation.privileges import Privilege, user_privileges
+from gn_auth.auth import db
+from gn_auth.auth.authorisation.privileges import Privilege, user_privileges
 
 from tests.unit.auth import conftest
 

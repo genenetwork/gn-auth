@@ -4,13 +4,13 @@ from uuid import UUID
 from redis import Redis
 from flask import jsonify, request, Response, Blueprint, current_app
 
-from gn3.auth import db
-from gn3.auth.db_utils import with_db_connection
-from gn3.auth.authorisation.checks import require_json
-from gn3.auth.authorisation.errors import NotFoundError
+from gn_auth.auth import db
+from gn_auth.auth.db_utils import with_db_connection
+from gn_auth.auth.authorisation.checks import require_json
+from gn_auth.auth.authorisation.errors import NotFoundError
 
-from gn3.auth.authentication.users import User, user_by_id
-from gn3.auth.authentication.oauth2.resource_server import require_oauth
+from gn_auth.auth.authentication.users import User, user_by_id
+from gn_auth.auth.authentication.oauth2.resource_server import require_oauth
 
 from .models import (
     add_traits,

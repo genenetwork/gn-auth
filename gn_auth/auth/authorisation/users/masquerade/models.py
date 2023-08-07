@@ -5,13 +5,13 @@ from datetime import datetime
 
 from flask import current_app as app
 
-from gn3.auth import db
+from gn_auth.auth import db
 
-from gn3.auth.authorisation.errors import ForbiddenAccess
-from gn3.auth.authorisation.roles.models import user_roles
+from gn_auth.auth.authorisation.errors import ForbiddenAccess
+from gn_auth.auth.authorisation.roles.models import user_roles
 
-from gn3.auth.authentication.users import User
-from gn3.auth.authentication.oauth2.models.oauth2token import (
+from gn_auth.auth.authentication.users import User
+from gn_auth.auth.authentication.oauth2.models.oauth2token import (
     OAuth2Token, save_token)
 
 __FIVE_HOURS__ = (60 * 60 * 5)
