@@ -7,11 +7,11 @@ from functools import partial
 from MySQLdb.cursors import DictCursor
 from flask import request, jsonify, Response, Blueprint, current_app
 
-from gn_auth.auth.db import sqlite3 as db
-from gn_auth.auth.db import mariadb as gn3db
+from ...db import sqlite3 as db
+from ...db import mariadb as gn3db
 
-from gn_auth.auth.dictify import dictify
-from gn_auth.auth.db.sqlite3 import with_db_connection
+from ...dictify import dictify
+from ...db.sqlite3 import with_db_connection
 
 from .data import link_data_to_group
 from .models import (

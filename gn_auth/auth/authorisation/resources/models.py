@@ -5,10 +5,10 @@ from uuid import UUID, uuid4
 from functools import reduce, partial
 from typing import Any, Dict, Sequence, Optional, NamedTuple
 
-from gn_auth.auth.db import sqlite3 as db
-from gn_auth.auth.dictify import dictify
-from gn_auth.auth.authentication.users import User
-from gn_auth.auth.db.sqlite3 import with_db_connection
+from ...db import sqlite3 as db
+from ...dictify import dictify
+from ...authentication.users import User
+from ...db.sqlite3 import with_db_connection
 
 from .checks import authorised_for
 

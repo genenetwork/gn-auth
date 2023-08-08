@@ -4,11 +4,10 @@ from typing import Callable
 
 from flask import request, current_app as app
 
-from gn_auth.auth.db import sqlite3 as db
-
 from . import privileges as auth_privs
 from .errors import InvalidData, AuthorisationError
 
+from ..db import sqlite3 as db
 from ..authentication.oauth2.resource_server import require_oauth
 
 def __system_privileges_in_roles__(conn, user):

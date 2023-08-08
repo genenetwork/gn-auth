@@ -18,16 +18,16 @@ from flask import (
 
 
 from gn_auth import session
-from gn_auth.auth.db import sqlite3 as db
-from gn_auth.auth.db.sqlite3 import with_db_connection
+from ....db import sqlite3 as db
+from ....db.sqlite3 import with_db_connection
 
-from gn_auth.auth.authentication.oauth2.models.oauth2client import (
+from ....authentication.oauth2.models.oauth2client import (
     save_client,
     OAuth2Client,
     oauth2_clients,
     client as oauth2_client,
     delete_client as _delete_client)
-from gn_auth.auth.authentication.users import (
+from ....authentication.users import (
     User,
     user_by_id,
     valid_login,

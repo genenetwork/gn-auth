@@ -2,11 +2,12 @@
 from functools import wraps
 from flask import flash, url_for, redirect
 
-from gn_auth.auth.authentication.users import User
-from gn_auth.auth.db.sqlite3 import with_db_connection
-from gn_auth.auth.authorisation.roles.models import user_roles
-
 from gn_auth.session import logged_in, session_user, clear_session_info
+
+from ....authentication.users import User
+from ....db.sqlite3 import with_db_connection
+
+from ...roles.models import user_roles
 
 def is_admin(func):
     """Verify user is a system admin."""

@@ -6,8 +6,8 @@ from functools import reduce
 
 from flask import request, jsonify, Response, Blueprint, current_app as app
 
-from gn_auth.auth.db import sqlite3 as db
-from gn_auth.auth.db.sqlite3 import with_db_connection
+from ...db import sqlite3 as db
+from ...db.sqlite3 import with_db_connection
 
 from .checks import authorised_for
 from .models import (

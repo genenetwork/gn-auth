@@ -4,12 +4,12 @@ from functools import partial
 
 from flask import request, jsonify, Response, Blueprint
 
-from gn_auth.auth.db.sqlite3 import with_db_connection
-from gn_auth.auth.authorisation.errors import InvalidData
-from gn_auth.auth.authorisation.checks import require_json
+from ...errors import InvalidData
+from ...checks import require_json
 
-from gn_auth.auth.authentication.users import user_by_id
-from gn_auth.auth.authentication.oauth2.resource_server import require_oauth
+from ....db.sqlite3 import with_db_connection
+from ....authentication.users import user_by_id
+from ....authentication.oauth2.resource_server import require_oauth
 
 from .models import masquerade_as
 

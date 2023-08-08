@@ -3,11 +3,12 @@ import uuid
 from typing import Iterable
 from MySQLdb.cursors import DictCursor
 
-import gn_auth.auth.db.sqlite3 as authdb
-import gn_auth.auth.db.mariadb as gn3db
-from gn_auth.auth.dictify import dictify
-from gn_auth.auth.authorisation.checks import authorised_p
-from gn_auth.auth.authorisation.groups.models import Group
+from ..checks import authorised_p
+from ..groups.models import Group
+
+from ...dictify import dictify
+from ...db import sqlite3 as authdb
+from ...db import mariadb as gn3db
 
 def linked_mrna_data(conn: authdb.DbConnection) -> Iterable[dict]:
     """Retrieve mRNA Assay data that is linked to user groups."""

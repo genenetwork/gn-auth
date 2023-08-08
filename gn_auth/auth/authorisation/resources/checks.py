@@ -3,8 +3,8 @@ from uuid import UUID
 from functools import reduce
 from typing import Sequence
 
-from gn_auth.auth.db import sqlite3 as db
-from gn_auth.auth.authentication.users import User
+from ...db import sqlite3 as db
+from ...authentication.users import User
 
 def __organise_privileges_by_resource_id__(rows):
     def __organise__(privs, row):

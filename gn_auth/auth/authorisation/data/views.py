@@ -10,32 +10,30 @@ from MySQLdb.cursors import DictCursor
 from authlib.integrations.flask_oauth2.errors import _HTTPException
 from flask import request, jsonify, Response, Blueprint, current_app as app
 
-import gn_auth.auth.db.mariadb as gn3db
-
 from gn_auth import jobs
 from gn_auth.commands import run_async_cmd
 
-from gn_auth.auth.db import sqlite3 as db
-from gn_auth.auth.db.sqlite3 import with_db_connection
+from ...db import sqlite3 as db
+from ...db import mariadb as gn3db
+from ...db.sqlite3 import with_db_connection
 
-from gn_auth.auth.authorisation.checks import require_json
-from gn_auth.auth.authorisation.errors import InvalidData, NotFoundError
+from ..checks import require_json
+from ..errors import InvalidData, NotFoundError
 
-from gn_auth.auth.authorisation.groups.models import group_by_id
+from ..groups.models import group_by_id
 
-from gn_auth.auth.authorisation.users.models import user_resource_roles
+from ..users.models import user_resource_roles
 
-from gn_auth.auth.authorisation.resources.checks import authorised_for
-from gn_auth.auth.authorisation.resources.models import (
+from ..resources.checks import authorised_for
+from ..resources.models import (
     user_resources, public_resources, attach_resources_data)
 
-from gn_auth.auth.authentication.users import User
-from gn_auth.auth.authentication.oauth2.resource_server import require_oauth
+from ...authentication.users import User
+from ...authentication.oauth2.resource_server import require_oauth
 
-from gn_auth.auth.authorisation.data.phenotypes import link_phenotype_data
-from gn_auth.auth.authorisation.data.mrna import link_mrna_data, ungrouped_mrna_data
-from gn_auth.auth.authorisation.data.genotypes import (
-    link_genotype_data, ungrouped_genotype_data)
+from ..data.phenotypes import link_phenotype_data
+from ..data.mrna import link_mrna_data, ungrouped_mrna_data
+from ..data.genotypes import link_genotype_data, ungrouped_genotype_data
 
 data = Blueprint("data", __name__)
 

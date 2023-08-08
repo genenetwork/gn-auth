@@ -2,12 +2,12 @@
 import uuid
 from functools import reduce
 
-from gn_auth.auth.db import sqlite3 as db
-from gn_auth.auth.authorisation.roles.models import Role
-from gn_auth.auth.authorisation.checks import authorised_p
-from gn_auth.auth.authorisation.privileges import Privilege
+from ..roles.models import Role
+from ..checks import authorised_p
+from ..privileges import Privilege
 
-from gn_auth.auth.authentication.users import User
+from ...db import sqlite3 as db
+from ...authentication.users import User
 
 @authorised_p(
     ("system:user:list",),

@@ -1,5 +1,4 @@
 """Application initialisation module."""
-
 import os
 import sys
 import logging
@@ -7,8 +6,8 @@ from typing import Optional
 
 from flask import Flask
 
-from gn_auth.auth import oauth2
 from gn_auth.misc_views import misc
+from gn_auth.auth.views import oauth2
 
 from gn_auth.auth.authentication.oauth2.server import setup_oauth2_server
 

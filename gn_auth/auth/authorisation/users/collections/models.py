@@ -6,7 +6,7 @@ from datetime import datetime
 from redis import Redis
 from email_validator import validate_email, EmailNotValidError
 
-from gn_auth.auth.authorisation.errors import InvalidData, NotFoundError
+from ...errors import InvalidData, NotFoundError
 
 from ..models import User
 

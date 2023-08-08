@@ -5,14 +5,13 @@ from typing import Any, Sequence, Iterable, NamedTuple
 
 from pymonad.either import Left, Right, Either
 
-from gn_auth.auth.db import sqlite3 as db
-from gn_auth.auth.dictify import dictify
-from gn_auth.auth.authentication.users import User
-from gn_auth.auth.authorisation.errors import AuthorisationError
+from ...db import sqlite3 as db
+from ...dictify import dictify
+from ...authentication.users import User
 
 from ..checks import authorised_p
 from ..privileges import Privilege
-from ..errors import NotFoundError
+from ..errors import NotFoundError, AuthorisationError
 
 class Role(NamedTuple):
     """Class representing a role: creates immutable objects."""

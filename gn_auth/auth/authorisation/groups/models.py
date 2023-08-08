@@ -7,9 +7,9 @@ from typing import Any, Sequence, Iterable, Optional, NamedTuple
 from flask import g
 from pymonad.maybe import Just, Maybe, Nothing
 
-from gn_auth.auth.db import sqlite3 as db
-from gn_auth.auth.dictify import dictify
-from gn_auth.auth.authentication.users import User, user_by_id
+from ...db import sqlite3 as db
+from ...dictify import dictify
+from ...authentication.users import User, user_by_id
 
 from ..checks import authorised_p
 from ..privileges import Privilege
