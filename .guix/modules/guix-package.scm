@@ -84,6 +84,12 @@
 		     #:recursive? #t
 		     #:select? vcs-file?))
  (build-system python-build-system)
+ (arguments
+  (list
+   #:phases
+   #~(modify-phases %standard-phases
+	(replace 'check
+	  (lambda _ (invoke "pytest" "-k" "unit_test"))))))
  ;; (inputs (list))
  (native-inputs
   (list python-mypy
