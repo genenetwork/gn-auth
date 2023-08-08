@@ -31,11 +31,7 @@ setup(author="Frederick M. Muriithi",
       long_description=LONG_DESCRIPTION,
       long_description_content_type="text/markdown",
       name="GeneNetwork-Auth",
-      packages=[
-          "gn_auth",
-          "gn_auth.auth",
-          "tests"
-      ],
+      package_dir = {'': "gn_auth"},
       url="https://github.com/genenetwork/gn-auth",
       version="0.0.0",
       tests_require=["pytest", "hypothesis"],
