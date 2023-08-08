@@ -1,0 +1,10 @@
+[SIMILARITIES]
+
+ignore-imports=yes
+
+[MESSAGES CONTROL]
+
+disable=
+	fixme,
+	duplicate-code,
+        no-else-return

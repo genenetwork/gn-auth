@@ -10,6 +10,8 @@ from typing import Dict, Optional, Tuple, Union, Sequence
 
 from redis.client import Redis
 
+from gn_auth.auth.db.redis import RedisConnectionError
+
 def queue_cmd(conn: Redis,
               job_queue: str,
               cmd: Union[str, Sequence[str]],

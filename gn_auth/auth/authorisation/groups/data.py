@@ -2,7 +2,7 @@
 from MySQLdb.cursors import DictCursor
 
 from gn_auth.auth.db import mariadb as gn3db
-from gn_auth.auth.db import sqlite3 as authdb
+import gn_auth.auth.db.sqlite3 as authdb
 from gn_auth.auth.authorisation.groups import Group
 from gn_auth.auth.authorisation.checks import authorised_p
 from gn_auth.auth.authorisation.errors import NotFoundError

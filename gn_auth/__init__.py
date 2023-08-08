@@ -1,15 +1,18 @@
+"""Application initialisation module."""
+
 import os
 import sys
 import logging
+from typing import Optional
 
 from flask import Flask
-
-from . import settings
 
 from gn_auth.auth import oauth2
 from gn_auth.misc_views import misc
 
 from gn_auth.auth.authentication.oauth2.server import setup_oauth2_server
+
+from . import settings
 
 class ConfigurationError(Exception):
     """Raised in case of a configuration error."""
@@ -48,14 +51,14 @@ def setup_logging_handlers(app: Flask) -> None:
     root_logger.addHandler(stderr_handler)
     root_logger.setLevel(app.config["LOGLEVEL"])
 
-def create_app(config: dict = {}) -> Flask:
+def create_app(config: Optional[dict] = None) -> Flask:
     """Create and return a new flask application."""
     app = Flask(__name__)
 
     # ====== Setup configuration ======
     app.config.from_object(settings) # Default settings
     # Override defaults with startup settings
-    app.config.update(config)
+    app.config.update(config or {})
     # Override app settings with site-local settings
     if "GN_AUTH_CONF" in os.environ:
         app.config.from_envvar("GN_AUTH_CONF")

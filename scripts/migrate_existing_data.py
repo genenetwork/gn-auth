@@ -14,7 +14,7 @@ from MySQLdb.cursors import DictCursor
 
 from gn_auth.auth.db import mariadb as biodb
 
-from gn_auth.auth.db import sqlite3 as authdb
+import gn_auth.auth.db.sqlite3 as authdb
 from gn_auth.auth.authentication.users import User
 from gn_auth.auth.authorisation.groups.models import Group, save_group
 from gn_auth.auth.authorisation.roles.models import (

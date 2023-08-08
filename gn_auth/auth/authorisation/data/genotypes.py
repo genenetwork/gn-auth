@@ -4,7 +4,7 @@ from typing import Iterable
 
 from MySQLdb.cursors import DictCursor
 
-import gn_auth.auth.db as authdb
+import gn_auth.auth.db.sqlite3 as authdb
 import gn_auth.auth.db.mariadb as gn3db
 from gn_auth.auth.dictify import dictify
 from gn_auth.auth.authorisation.checks import authorised_p

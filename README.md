@@ -10,7 +10,7 @@ used across the entire suite of the GeneNetwork services.
 ### Linting
 
 ```bash
-pylint *py tests gn3 scripts
+pylint *py tests gn_auth scripts
 ```
 
 ### Type-Checking

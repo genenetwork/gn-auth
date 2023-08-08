@@ -6,6 +6,8 @@ from typing import Any, Callable, Iterator
 
 import traceback
 
+from flask import current_app
+
 from .protocols import DbCursor, DbConnection
 
 @contextlib.contextmanager

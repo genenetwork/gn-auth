@@ -6,6 +6,7 @@ from functools import reduce
 
 from flask import request, jsonify, Response, Blueprint, current_app as app
 
+from gn_auth.auth.db import sqlite3 as db
 from gn_auth.auth.db.sqlite3 import with_db_connection
 
 from .checks import authorised_for
@@ -19,7 +20,6 @@ from ..roles import Role
 from ..errors import InvalidData, InconsistencyError, AuthorisationError
 from ..groups.models import Group, GroupRole, group_role_by_id
 
-from ... import db
 from ...dictify import dictify
 from ...authentication.oauth2.resource_server import require_oauth
 from ...authentication.users import User, user_by_id, user_by_email
