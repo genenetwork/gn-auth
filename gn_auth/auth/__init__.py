@@ -1,2 +1,1 @@
 """Top-Level `Auth` module"""
-
