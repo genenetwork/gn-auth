@@ -3,11 +3,23 @@ import logging
 import traceback
 import contextlib
 from urllib.parse import urlparse
-from typing import Tuple, Iterator
+from typing import Any, Tuple, Protocol, Iterator
 
 import MySQLdb as mdb
 
-from .protocols import DbConnection
+class DbConnection(Protocol):
+    """Type annotation for a generic database connection object."""
+    def cursor(self, *args, **kwargs) -> Any:
+        """A cursor object"""
+        ...
+
+    def commit(self, *args, **kwargs) -> Any:
+        """Commit the transaction."""
+        ...
+
+    def rollback(self) -> Any:
+        """Rollback the transaction."""
+        ...
 
 def parse_db_url(sql_uri: str) -> Tuple:
     """Parse SQL_URI env variable note:there is a default value for SQL_URI so a

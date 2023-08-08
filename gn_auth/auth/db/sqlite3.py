@@ -2,13 +2,27 @@
 import sqlite3
 import logging
 import contextlib
-from typing import Any, Callable, Iterator
+from typing import Any, Protocol, Callable, Iterator
 
 import traceback
 
 from flask import current_app
 
-from .protocols import DbCursor, DbConnection
+from .protocols import DbCursor
+
+class DbConnection(Protocol):
+    """Type annotation for a generic database connection object."""
+    def cursor(self) -> Any:
+        """A cursor object"""
+        ...
+
+    def commit(self) -> Any:
+        """Commit the transaction."""
+        ...
+
+    def rollback(self) -> Any:
+        """Rollback the transaction."""
+        ...
 
 @contextlib.contextmanager
 def connection(db_path: str, row_factory: Callable = sqlite3.Row) -> Iterator[DbConnection]:

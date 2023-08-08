@@ -1,20 +1,6 @@
 """Common Database connection protocols."""
 from typing import Any, Protocol
 
-class DbConnection(Protocol):
-    """Type annotation for a generic database connection object."""
-    def cursor(self, *args, **kwargs) -> Any:
-        """A cursor object"""
-        ...
-
-    def commit(self) -> Any:
-        """Commit the transaction."""
-        ...
-
-    def rollback(self) -> Any:
-        """Rollback the transaction."""
-        ...
-
 class DbCursor(Protocol):
     """Type annotation for a generic database cursor object."""
     def execute(self, *args, **kwargs) -> Any:
