@@ -1,4 +1,4 @@
-(define-module (genenetwork-auth)
+(define-module (gn gn-auth)
   #:use-module (guix)
   #:use-module (guix git-download)
   #:use-module (guix build-system python)

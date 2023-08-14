@@ -1,1 +1,1 @@
-.guix/modules/guix-package.scm
+.guix/modules/gn/packages/gn-auth.scm
