@@ -1,4 +1,4 @@
-(define-module (gn gn-auth)
+(define-module (gn packages gn-auth)
   #:use-module (guix)
   #:use-module (guix packages)
   #:use-module (guix download)
@@ -16,16 +16,16 @@
   ;; Packages from guix
   #:use-module (gnu packages check)
 
+  #:use-module (gnu packages django)
+
   #:use-module (gnu packages python-web)
   #:use-module (gnu packages python-xyz)
   #:use-module (gnu packages python-check)
   #:use-module (gnu packages python-crypto)
 
-  #:use-module (gnu packages databases)
+  #:use-module (gnu packages databases))
 
-  #:use-module (gnu packages django))
-
-(define %source-dir (dirname (dirname (dirname (current-filename)))))
+(define %source-dir (dirname (dirname (dirname (dirname (dirname (current-filename)))))))
 
 (define (get-commit)
   "Retrieve the commit if the source directory is a repository."
