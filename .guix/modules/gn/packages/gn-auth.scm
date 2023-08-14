@@ -54,22 +54,25 @@
 
 (define (get-latest-version)
   "Get latest version tag from repository."
-  (let ((%repo #f)
-	(%tags (list))
-	(%repo-head #f))
-    (begin (libgit2-init!)
-	   (set! %repo (repository-open %source-dir))
-	   (set! %repo-head (reference-target (repository-head %repo)))
-	   (tag-foreach %repo
-			(lambda (tname tref)
-			  (set! %tags (list (cons tname (tag-lookup %repo tref))))
-			  0))
-	   (libgit2-shutdown!)
-	   (if (zero? (length %tags))
-	       (string-append "v0.0.0-" (substring (oid->string %repo-head) 0 8))
-	       (process-version
-		%repo-head
-		(list-last (sort-list %tags (lambda (item) (error item)))))))))
+  (if (git-predicate %source-dir)
+      (let ((%repo #f)
+	    (%tags (list))
+	    (%repo-head #f))
+	(begin (libgit2-init!)
+	       (set! %repo (repository-open %source-dir))
+	       (set! %repo-head (reference-target (repository-head %repo)))
+	       (tag-foreach %repo
+			    (lambda (tname tref)
+			      (set! %tags (list (cons tname (tag-lookup %repo tref))))
+			      0))
+	       (libgit2-shutdown!)
+	       (if (zero? (length %tags))
+		   (string-append "v0.0.0-" (substring (oid->string %repo-head) 0 8))
+		   (process-version
+		    %repo-head
+		    (list-last (sort-list %tags (lambda (item) (error item))))))))
+      ;; Figure out a way to get the version in the checkouts when building
+      "v0.0.0"))
 
 (define vcs-file?
   (or (git-predicate %source-dir)
