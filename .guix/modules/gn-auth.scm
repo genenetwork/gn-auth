@@ -1,4 +1,4 @@
-(define-module (gn packages gn-auth)
+(define-module (gn-auth)
   #:use-module (guix)
   #:use-module (guix packages)
   #:use-module (guix download)
