@@ -21,7 +21,7 @@
   ;; Packages from guix-bioinformatics
   #:use-module (gn packages python-web))
 
-(define %source-dir (dirname (dirname (dirname (dirname (dirname (current-filename)))))))
+(define %source-dir (dirname (dirname (current-source-directory))))
 
 (define vcs-file?
   (or (git-predicate %source-dir)
@@ -31,7 +31,8 @@
   (package
    (name "gn-auth")
    (version "0.1.0-git")
-   (source (local-file %source-dir "gn-auth-checkout"
+   (source (local-file "../.."
+		       "gn-auth-checkout"
 		       #:recursive? #t
 		       #:select? vcs-file?))
    (build-system python-build-system)
