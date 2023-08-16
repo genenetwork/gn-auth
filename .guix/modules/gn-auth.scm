@@ -19,7 +19,7 @@
   #:use-module (gnu packages databases)
 
   ;; Packages from guix-bioinformatics
-  #:use-module (gnu packages python-web))
+  #:use-module (gn packages python-web))
 
 (define %source-dir (dirname (dirname (dirname (dirname (dirname (current-filename)))))))
 
