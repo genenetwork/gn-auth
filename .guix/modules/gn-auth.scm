@@ -23,7 +23,10 @@
   #:use-module (gnu packages python-check)
   #:use-module (gnu packages python-crypto)
 
-  #:use-module (gnu packages databases))
+  #:use-module (gnu packages databases)
+
+  ;; Packages from guix-bioinformatics
+  #:use-module (gnu packages python-web))
 
 (define %source-dir (dirname (dirname (dirname (dirname (dirname (current-filename)))))))
 
@@ -77,35 +80,6 @@
 (define vcs-file?
   (or (git-predicate %source-dir)
       (const #t)))
-
-(define-public python-authlib
-  (package
-   (name "python-authlib")
-   (version "1.2.0")
-   (source (origin
-            (method url-fetch)
-            (uri (pypi-uri "Authlib" version))
-            (sha256
-             (base32
-              "178ycfypdv1hy4zjm09rmysxakmwch2n6a5wypwmx4d5hc4fi8sg"))))
-   (build-system python-build-system)
-   (native-inputs (list python-httpx
-			python-flask
-			python-django
-			python-werkzeug
-			python-starlette
-			python-sqlalchemy
-			python-pycryptodomex))
-   (propagated-inputs (list python-cryptography))
-   (arguments `(#:tests? #f)) ;; temporarily deactivate tests
-   (home-page "https://authlib.org/")
-   (synopsis
-    "The ultimate Python library in building OAuth and OpenID Connect servers and clients.")
-   (description
-    "The ultimate Python library in building OAuth and OpenID Connect servers and
-clients. It is designed from low level specifications implementations to high
-level frameworks integrations, to meet the needs of everyone.")
-   (license license:bsd-3)))
 
 (define-public gn-auth
   (package
