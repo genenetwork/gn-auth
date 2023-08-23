@@ -11,15 +11,15 @@ class DbConnection(Protocol):
     """Type annotation for a generic database connection object."""
     def cursor(self, *args, **kwargs) -> Any:
         """A cursor object"""
-        ...
+        raise NotImplementedError
 
     def commit(self, *args, **kwargs) -> Any:
         """Commit the transaction."""
-        ...
+        raise NotImplementedError
 
     def rollback(self) -> Any:
         """Rollback the transaction."""
-        ...
+        raise NotImplementedError
 
 def parse_db_url(sql_uri: str) -> Tuple:
     """Parse SQL_URI env variable note:there is a default value for SQL_URI so a

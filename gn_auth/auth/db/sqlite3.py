@@ -14,15 +14,15 @@ class DbConnection(Protocol):
     """Type annotation for a generic database connection object."""
     def cursor(self) -> Any:
         """A cursor object"""
-        ...
+        raise NotImplementedError
 
     def commit(self) -> Any:
         """Commit the transaction."""
-        ...
+        raise NotImplementedError
 
     def rollback(self) -> Any:
         """Rollback the transaction."""
-        ...
+        raise NotImplementedError
 
 @contextlib.contextmanager
 def connection(db_path: str, row_factory: Callable = sqlite3.Row) -> Iterator[DbConnection]:
