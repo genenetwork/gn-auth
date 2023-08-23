@@ -16,8 +16,6 @@ create_role_failure = {
     "message": "Unauthorised: Could not create role"
 }
 
-uuid_fn = lambda : uuid.UUID("d32611e3-07fc-4564-b56c-786c6db6de2b")
-
 PRIVILEGES = (
     Privilege("group:resource:view-resource",
               "view a resource and use it in computations"),
@@ -36,7 +34,7 @@ def test_create_role(# pylint: disable=[too-many-arguments]
     THEN: verify they are only able to create the role if they have the
           appropriate privileges
     """
-    mocker.patch("gn_auth.auth.authorisation.roles.models.uuid4", uuid_fn)
+    mocker.patch("gn_auth.auth.authorisation.roles.models.uuid4", conftest.uuid_fn)
     mocker.patch("gn_auth.auth.authorisation.checks.require_oauth.acquire",
                  conftest.get_tokeniser(user))
     with db.connection(auth_testdb_path) as conn, db.cursor(conn) as cursor:
@@ -55,7 +53,7 @@ def test_create_role_raises_exception_for_unauthorised_users(# pylint: disable=[
     THEN: verify they are only able to create the role if they have the
           appropriate privileges
     """
-    mocker.patch("gn_auth.auth.authorisation.roles.models.uuid4", uuid_fn)
+    mocker.patch("gn_auth.auth.authorisation.roles.models.uuid4", conftest.uuid_fn)
     mocker.patch("gn_auth.auth.authorisation.checks.require_oauth.acquire",
                  conftest.get_tokeniser(user))
     with db.connection(auth_testdb_path) as conn, db.cursor(conn) as cursor:

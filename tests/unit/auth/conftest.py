@@ -22,3 +22,7 @@ def get_tokeniser(user):
         }[user.user_id]
 
     return __token__
+
+def uuid_fn():
+    """Return a specific UUID for testing."""
+    return uuid.UUID("d32611e3-07fc-4564-b56c-786c6db6de2b")
