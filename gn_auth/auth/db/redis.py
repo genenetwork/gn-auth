@@ -18,5 +18,4 @@ def connection(redis_uri) -> Iterator[Redis]:
         logging.debug(traceback.format_exc())
         raise
     finally:
-        rconn.disconnect()
         rconn.close()
