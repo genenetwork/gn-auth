@@ -51,7 +51,8 @@
 	  python-pytest-mock
           python-mypy-extensions))
    (propagated-inputs
-    (list python-flask
+    (list gunicorn
+	  python-flask
 	  python-redis
 	  python-authlib
 	  python-pymonad
