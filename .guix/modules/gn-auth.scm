@@ -1,5 +1,6 @@
 (define-module (gn-auth)
   #:use-module (guix)
+  #:use-module (guix gexp)
   #:use-module (guix packages)
   #:use-module (guix download)
   #:use-module (guix git-download)
