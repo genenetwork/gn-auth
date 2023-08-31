@@ -37,6 +37,14 @@ variable of the same name as the variable you wish to override.
 | `AUTH_MIGRATIONS` | Migrations | Relative (to the repo root) path to the migration scripts for the auth(entic/oris)ation database |
 | `OAUTH2_SCOPE` | Supported OAuth2 scope for the application. |
 
+There are a few other variables we can set, if we want to customise, or troubleshoot token generation. These are:
+
+| Variable | Used By/For | Description |
+| ---- | ---- | ---- |
+| `OAUTH2_ACCESS_TOKEN_GENERATOR` | Generating new access tokens. | A string value that points to the function that generates the access token. e.g. `OAUTH2_ACCESS_TOKEN_GENERATOR='the_project.tokens.generate_token'`. |
+| `OAUTH2_REFRESH_TOKEN_GENERATOR` | Generating refresh tokens. | Similar to the `OAUTH2_ACCESS_TOKEN_GENERATOR` setting above, except this setting relates to the refresh token. |
+| `OAUTH2_TOKEN_EXPIRES_IN` | Limiting token expiry time. | This can be set to limit the amount of time a token is valid for. It can be a dict object or import string. |
+
 ## Installation
 
 The recommended way to install the application is using GNU Guix[^gnu-guix]. You
