@@ -39,7 +39,11 @@ migrations_and_tables = (
     ("20230404_02_la33P-create-genotype-resources-table.py",
      "genotype_resources"),
     ("20230410_01_8mwaf-create-linked-mrna-data-table.py", "linked_mrna_data"),
-    ("20230410_02_WZqSf-create-mrna-resources-table.py", "mrna_resources"))
+    ("20230410_02_WZqSf-create-mrna-resources-table.py", "mrna_resources"),
+    ("20230906_01_YGCEF-link-inbredset-groups-to-auth-system.py",
+     "linked_inbredset_groups"),
+    ("20230906_01_YGCEF-link-inbredset-groups-to-auth-system.py",
+     "inbredset_group_resources"))
 
 @pytest.mark.unit_test
 @pytest.mark.parametrize("migration_file,the_table", migrations_and_tables)
@@ -60,6 +64,7 @@ def test_create_table(
         apply_single_migration(backend, get_migration(migration_path))
         cursor.execute("SELECT name FROM sqlite_schema WHERE type='table'")
         result_after_migration = cursor.fetchall()
+        rollback_single_migration(backend, get_migration(migration_path))
 
     rollback_migrations(backend, older_migrations)
     assert the_table not in [row[0] for row in result_before_migration]
