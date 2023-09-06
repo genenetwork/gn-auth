@@ -20,6 +20,7 @@
   #:use-module (gnu packages databases)
 
   ;; Packages from guix-bioinformatics
+  #:use-module (gn packages python)
   #:use-module (gn packages python-web))
 
 (define %source-dir (dirname (dirname (current-source-directory))))
@@ -47,23 +48,23 @@
 	      (when tests?
 		(invoke "pytest" "-k" "unit_test")))))))
     (native-inputs
-     (list python-mypy
-	   python-pytest
-	   python-pylint
-	   python-hypothesis
-	   python-pytest-mock
-           python-mypy-extensions))
+     `(("python-mypy" ,python-mypy-0.981)
+       ("python-pytest" ,python-pytest)
+       ("python-pylint" ,python-pylint)
+       ("python-hypothesis" ,python-hypothesis)
+       ("python-pytest-mock" ,python-pytest-mock)
+       ("python-mypy-extensions" ,python-mypy-extensions)))
     (propagated-inputs
-     (list gunicorn
-	   python-flask
-	   python-redis
-	   python-authlib
-	   python-pymonad
-	   yoyo-migrations
-	   python-bcrypt ;; remove after removing all references
-	   python-mysqlclient
-	   python-argon2-cffi
-	   python-email-validator))
+     `(("gunicorn" ,gunicorn)
+       ("python-flask" ,python-flask)
+       ("python-redis" ,python-redis)
+       ("python-authlib" ,python-authlib)
+       ("python-pymonad" ,python-pymonad)
+       ("yoyo-migrations" ,yoyo-migrations-8.2.0)
+       ("python-bcrypt" ,python-bcrypt) ;; remove after removing all references
+       ("python-mysqlclient" ,python-mysqlclient)
+       ("python-argon2-cffi" ,python-argon2-cffi)
+       ("python-email-validator" ,python-email-validator)))
     (home-page "https://github.com/genenetwork/gn-auth")
     (synopsis "Authentication and Authorisation server for GeneNetwork services")
     (description "Authentication and Authorisation server for GeneNetwork services.")
