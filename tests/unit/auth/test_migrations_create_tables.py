@@ -41,7 +41,9 @@ migrations_and_tables = (
     ("20230410_01_8mwaf-create-linked-mrna-data-table.py", "linked_mrna_data"),
     ("20230410_02_WZqSf-create-mrna-resources-table.py", "mrna_resources"),
     ("20230907_01_pjnxz-refactor-add-resource-ownership-table.py",
-     "resource_ownership"))
+     "resource_ownership"),
+    ("20230907_04_3LnrG-refactor-create-group-resources-table.py",
+     "group_resources"))
 
 @pytest.mark.unit_test
 @pytest.mark.parametrize("migration_file,the_table", migrations_and_tables)
