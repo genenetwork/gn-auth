@@ -4,12 +4,12 @@ from uuid import UUID, uuid4
 from functools import reduce, partial
 from typing import Dict, Sequence, Optional
 
+from pymonad.maybe import Just, Maybe, Nothing
+
 from ...db import sqlite3 as db
 from ...dictify import dictify
 from ...authentication.users import User
 from ...db.sqlite3 import with_db_connection
-
-from .checks import authorised_for
 
 from ..checks import authorised_p
 from ..errors import NotFoundError, AuthorisationError
@@ -383,3 +383,20 @@ def save_resource(
 
     raise AuthorisationError(
         "You do not have the appropriate privileges to edit this resource.")
+
+def resource_group(conn: db.DbConnection, resource: Resource) -> Maybe[Group]:
+    """Return the group that owns the resource."""
+    with db.cursor(conn) as cursor:
+        cursor.execute(
+            "SELECT g.* FROM resource_ownership AS ro "
+            "INNER JOIN groups AS g ON ro.group_id=g.group_id "
+            "WHERE ro.resource_id=?",
+            (str(resource.resource_id),))
+        row = cursor.fetchone()
+        if row:
+            return Just(Group(
+                UUID(row["group_id"]),
+                row["group_name"],
+                json.loads(row["group_metadata"])))
+
+    return Nothing
