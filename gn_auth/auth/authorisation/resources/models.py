@@ -1,6 +1,5 @@
 """Handle the management of resources."""
 import json
-import sqlite3
 from uuid import UUID, uuid4
 from functools import reduce, partial
 from typing import Dict, Sequence, Optional
@@ -17,17 +16,34 @@ from ..errors import NotFoundError, AuthorisationError
 from ..groups.models import (
     Group, GroupRole, user_group, group_by_id, is_group_leader)
 
+from .checks import authorised_for
+from .base import Resource, ResourceCategory
+from .mrna_resource import (
+    resource_data as mrna_resource_data,
+    attach_resources_data as mrna_attach_resources_data,
+    link_data_to_resource as mrna_link_data_to_resource,
+    unlink_data_from_resource as mrna_unlink_data_from_resource)
+from .genotype_resource import (
+    resource_data as genotype_resource_data,
+    attach_resources_data as genotype_attach_resources_data,
+    link_data_to_resource as genotype_link_data_to_resource,
+    unlink_data_from_resource as genotype_unlink_data_from_resource)
+from .phenotype_resource import (
+    resource_data as phenotype_resource_data,
+    attach_resources_data as phenotype_attach_resources_data,
+    link_data_to_resource as phenotype_link_data_to_resource,
+    unlink_data_from_resource as phenotype_unlink_data_from_resource)
+
 class MissingGroupError(AuthorisationError):
     """Raised for any resource operation without a group."""
 
-
-def __assign_resource_owner_role__(cursor, resource, user):
+def __assign_resource_owner_role__(cursor, resource, user, group):
     """Assign `user` the 'Resource Owner' role for `resource`."""
     cursor.execute(
         "SELECT gr.* FROM group_roles AS gr INNER JOIN roles AS r "
         "ON gr.role_id=r.role_id WHERE r.role_name='resource-owner' "
         "AND gr.group_id=?",
-        (str(resource.group.group_id),))
+        (str(group.group_id),))
     role = cursor.fetchone()
     if not role:
         cursor.execute("SELECT * FROM roles WHERE role_name='resource-owner'")
@@ -36,7 +52,7 @@ def __assign_resource_owner_role__(cursor, resource, user):
             "INSERT INTO group_roles VALUES "
             "(:group_role_id, :group_id, :role_id)",
             {"group_role_id": str(uuid4()),
-             "group_id": str(resource.group.group_id),
+             "group_id": str(group.group_id),
              "role_id": role["role_id"]})
 
     cursor.execute(
@@ -44,7 +60,7 @@ def __assign_resource_owner_role__(cursor, resource, user):
             "VALUES ("
             ":group_id, :user_id, :role_id, :resource_id"
             ")",
-            {"group_id": str(resource.group.group_id),
+            {"group_id": str(resource.group_id),
              "user_id": str(user.user_id),
              "role_id": role["role_id"],
              "resource_id": str(resource.resource_id)})
@@ -63,15 +79,17 @@ def create_resource(
         if not group:
             raise MissingGroupError(
                 "User with no group cannot create a resource.")
-        resource = Resource(
-            group, uuid4(), resource_name, resource_category, public)
+        resource = Resource(uuid4(), resource_name, resource_category, public)
         cursor.execute(
-            "INSERT INTO resources VALUES (?, ?, ?, ?, ?)",
-            (str(resource.group.group_id), str(resource.resource_id),
+            "INSERT INTO resources VALUES (?, ?, ?, ?)",
+            (str(resource.resource_id),
              resource_name,
              str(resource.resource_category.resource_category_id),
              1 if resource.public else 0))
-        __assign_resource_owner_role__(cursor, resource, user)
+        cursor.execute("INSERT INTO resource_ownership (group_id, resource_id) "
+                       "VALUES (?, ?)",
+                       (str(group.group_id), str(resource.resource_id)))
+        __assign_resource_owner_role__(cursor, resource, user, group)
 
     return resource
 
@@ -201,50 +219,6 @@ def attach_resource_data(cursor: db.DbCursor, resource: Resource) -> Resource:
         resource.group, resource.resource_id, resource.resource_name,
         resource.resource_category, resource.public, data_rows)
 
-def mrna_resource_data(cursor: db.DbCursor,
-                       resource_id: UUID,
-                       offset: int = 0,
-                       limit: Optional[int] = None) -> Sequence[sqlite3.Row]:
-    """Fetch data linked to a mRNA resource"""
-    cursor.execute(
-        (("SELECT * FROM mrna_resources AS mr "
-          "INNER JOIN linked_mrna_data AS lmr "
-          "ON mr.data_link_id=lmr.data_link_id "
-          "WHERE mr.resource_id=?") + (
-              f" LIMIT {limit} OFFSET {offset}" if bool(limit) else "")),
-        (str(resource_id),))
-    return cursor.fetchall()
-
-def genotype_resource_data(
-        cursor: db.DbCursor,
-        resource_id: UUID,
-        offset: int = 0,
-        limit: Optional[int] = None) -> Sequence[sqlite3.Row]:
-    """Fetch data linked to a Genotype resource"""
-    cursor.execute(
-        (("SELECT * FROM genotype_resources AS gr "
-          "INNER JOIN linked_genotype_data AS lgd "
-          "ON gr.data_link_id=lgd.data_link_id "
-          "WHERE gr.resource_id=?") + (
-              f" LIMIT {limit} OFFSET {offset}" if bool(limit) else "")),
-        (str(resource_id),))
-    return cursor.fetchall()
-
-def phenotype_resource_data(
-        cursor: db.DbCursor,
-        resource_id: UUID,
-        offset: int = 0,
-        limit: Optional[int] = None) -> Sequence[sqlite3.Row]:
-    """Fetch data linked to a Phenotype resource"""
-    cursor.execute(
-        ("SELECT * FROM phenotype_resources AS pr "
-         "INNER JOIN linked_phenotype_data AS lpd "
-         "ON pr.data_link_id=lpd.data_link_id "
-         "WHERE pr.resource_id=?") + (
-             f" LIMIT {limit} OFFSET {offset}" if bool(limit) else ""),
-        (str(resource_id),))
-    return cursor.fetchall()
-
 def resource_by_id(
         conn: db.DbConnection, user: User, resource_id: UUID) -> Resource:
     """Retrieve a resource by its ID."""
@@ -268,51 +242,6 @@ def resource_by_id(
 
     raise NotFoundError(f"Could not find a resource with id '{resource_id}'")
 
-def __link_mrna_data_to_resource__(
-        conn: db.DbConnection, resource: Resource, data_link_id: UUID) -> dict:
-    """Link mRNA Assay data with a resource."""
-    with db.cursor(conn) as cursor:
-        params = {
-            "group_id": str(resource.group.group_id),
-            "resource_id": str(resource.resource_id),
-            "data_link_id": str(data_link_id)
-        }
-        cursor.execute(
-            "INSERT INTO mrna_resources VALUES"
-            "(:group_id, :resource_id, :data_link_id)",
-            params)
-        return params
-
-def __link_geno_data_to_resource__(
-        conn: db.DbConnection, resource: Resource, data_link_id: UUID) -> dict:
-    """Link Genotype data with a resource."""
-    with db.cursor(conn) as cursor:
-        params = {
-            "group_id": str(resource.group.group_id),
-            "resource_id": str(resource.resource_id),
-            "data_link_id": str(data_link_id)
-        }
-        cursor.execute(
-            "INSERT INTO genotype_resources VALUES"
-            "(:group_id, :resource_id, :data_link_id)",
-            params)
-        return params
-
-def __link_pheno_data_to_resource__(
-        conn: db.DbConnection, resource: Resource, data_link_id: UUID) -> dict:
-    """Link Phenotype data with a resource."""
-    with db.cursor(conn) as cursor:
-        params = {
-            "group_id": str(resource.group.group_id),
-            "resource_id": str(resource.resource_id),
-            "data_link_id": str(data_link_id)
-        }
-        cursor.execute(
-            "INSERT INTO phenotype_resources VALUES"
-            "(:group_id, :resource_id, :data_link_id)",
-            params)
-        return params
-
 def link_data_to_resource(
         conn: db.DbConnection, user: User, resource_id: UUID, dataset_type: str,
         data_link_id: UUID) -> dict:
@@ -327,49 +256,10 @@ def link_data_to_resource(
     resource = with_db_connection(partial(
         resource_by_id, user=user, resource_id=resource_id))
     return {
-        "mrna": __link_mrna_data_to_resource__,
-        "genotype": __link_geno_data_to_resource__,
-        "phenotype": __link_pheno_data_to_resource__,
+        "mrna": mrna_link_data_to_resource,
+        "genotype": genotype_link_data_to_resource,
+        "phenotype": phenotype_link_data_to_resource,
     }[dataset_type.lower()](conn, resource, data_link_id)
-
-def __unlink_mrna_data_to_resource__(
-        conn: db.DbConnection, resource: Resource, data_link_id: UUID) -> dict:
-    """Unlink data from mRNA Assay resources"""
-    with db.cursor(conn) as cursor:
-        cursor.execute("DELETE FROM mrna_resources "
-                       "WHERE resource_id=? AND data_link_id=?",
-                       (str(resource.resource_id), str(data_link_id)))
-        return {
-            "resource_id": str(resource.resource_id),
-            "dataset_type": resource.resource_category.resource_category_key,
-            "data_link_id": data_link_id
-        }
-
-def __unlink_geno_data_to_resource__(
-        conn: db.DbConnection, resource: Resource, data_link_id: UUID) -> dict:
-    """Unlink data from Genotype resources"""
-    with db.cursor(conn) as cursor:
-        cursor.execute("DELETE FROM genotype_resources "
-                       "WHERE resource_id=? AND data_link_id=?",
-                       (str(resource.resource_id), str(data_link_id)))
-        return {
-            "resource_id": str(resource.resource_id),
-            "dataset_type": resource.resource_category.resource_category_key,
-            "data_link_id": data_link_id
-        }
-
-def __unlink_pheno_data_to_resource__(
-        conn: db.DbConnection, resource: Resource, data_link_id: UUID) -> dict:
-    """Unlink data from Phenotype resources"""
-    with db.cursor(conn) as cursor:
-        cursor.execute("DELETE FROM phenotype_resources "
-                       "WHERE resource_id=? AND data_link_id=?",
-                       (str(resource.resource_id), str(data_link_id)))
-        return {
-            "resource_id": str(resource.resource_id),
-            "dataset_type": resource.resource_category.resource_category_key,
-            "data_link_id": str(data_link_id)
-        }
 
 def unlink_data_from_resource(
         conn: db.DbConnection, user: User, resource_id: UUID, data_link_id: UUID):
@@ -385,9 +275,9 @@ def unlink_data_from_resource(
         resource_by_id, user=user, resource_id=resource_id))
     dataset_type = resource.resource_category.resource_category_key
     return {
-        "mrna": __unlink_mrna_data_to_resource__,
-        "genotype": __unlink_geno_data_to_resource__,
-        "phenotype": __unlink_pheno_data_to_resource__,
+        "mrna": mrna_unlink_data_from_resource,
+        "genotype": genotype_unlink_data_from_resource,
+        "phenotype": phenotype_unlink_data_from_resource,
     }[dataset_type.lower()](conn, resource, data_link_id)
 
 def organise_resources_by_category(resources: Sequence[Resource]) -> dict[
@@ -401,66 +291,14 @@ def organise_resources_by_category(resources: Sequence[Resource]) -> dict[
         }
     return reduce(__organise__, resources, {})
 
-def __attach_data__(
-        data_rows: Sequence[sqlite3.Row],
-        resources: Sequence[Resource]) -> Sequence[Resource]:
-    def __organise__(acc, row):
-        resource_id = UUID(row["resource_id"])
-        return {
-            **acc,
-            resource_id: acc.get(resource_id, tuple()) + (dict(row),)
-        }
-    organised: dict[UUID, tuple[dict, ...]] = reduce(__organise__, data_rows, {})
-    return tuple(
-        Resource(
-            resource.group, resource.resource_id, resource.resource_name,
-            resource.resource_category, resource.public,
-            organised.get(resource.resource_id, tuple()))
-        for resource in resources)
-
-def attach_mrna_resources_data(
-        cursor, resources: Sequence[Resource]) -> Sequence[Resource]:
-    """Attach linked data to mRNA Assay resources"""
-    placeholders = ", ".join(["?"] * len(resources))
-    cursor.execute(
-        "SELECT * FROM mrna_resources AS mr INNER JOIN linked_mrna_data AS lmd"
-        " ON mr.data_link_id=lmd.data_link_id "
-        f"WHERE mr.resource_id IN ({placeholders})",
-        tuple(str(resource.resource_id) for resource in resources))
-    return __attach_data__(cursor.fetchall(), resources)
-
-def attach_genotype_resources_data(
-        cursor, resources: Sequence[Resource]) -> Sequence[Resource]:
-    """Attach linked data to Genotype resources"""
-    placeholders = ", ".join(["?"] * len(resources))
-    cursor.execute(
-        "SELECT * FROM genotype_resources AS gr "
-        "INNER JOIN linked_genotype_data AS lgd "
-        "ON gr.data_link_id=lgd.data_link_id "
-        f"WHERE gr.resource_id IN ({placeholders})",
-        tuple(str(resource.resource_id) for resource in resources))
-    return __attach_data__(cursor.fetchall(), resources)
-
-def attach_phenotype_resources_data(
-        cursor, resources: Sequence[Resource]) -> Sequence[Resource]:
-    """Attach linked data to Phenotype resources"""
-    placeholders = ", ".join(["?"] * len(resources))
-    cursor.execute(
-        "SELECT * FROM phenotype_resources AS pr "
-        "INNER JOIN linked_phenotype_data AS lpd "
-        "ON pr.data_link_id=lpd.data_link_id "
-        f"WHERE pr.resource_id IN ({placeholders})",
-        tuple(str(resource.resource_id) for resource in resources))
-    return __attach_data__(cursor.fetchall(), resources)
-
 def attach_resources_data(
         conn: db.DbConnection, resources: Sequence[Resource]) -> Sequence[
             Resource]:
     """Attach linked data for each resource in `resources`"""
     resource_data_function = {
-        "mrna": attach_mrna_resources_data,
-        "genotype": attach_genotype_resources_data,
-        "phenotype": attach_phenotype_resources_data
+        "mrna": mrna_attach_resources_data,
+        "genotype": genotype_attach_resources_data,
+        "phenotype": phenotype_attach_resources_data
     }
     organised = organise_resources_by_category(resources)
     with db.cursor(conn) as cursor:
