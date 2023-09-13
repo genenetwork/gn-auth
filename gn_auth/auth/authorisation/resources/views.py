@@ -154,7 +154,6 @@ def resource_users(resource_id: uuid.UUID):
     with require_oauth.acquire("profile group resource") as the_token:
         def __the_users__(conn: db.DbConnection):
             resource = resource_by_id(conn, the_token.user, resource_id)
-            rgroup = resource_group(conn, resource).maybe(None, lambda grp: grp)
             authorised = authorised_for(
                 conn, the_token.user, ("group:resource:edit-resource",),
                 (resource_id,))
@@ -166,7 +165,7 @@ def resource_users(resource_id: uuid.UUID):
                             "user", User(user_id, row["email"], row["name"]))
                         role = GroupRole(
                             uuid.UUID(row["group_role_id"]),
-                            rgroup,
+                            resource_group(conn, resource),
                             Role(uuid.UUID(row["role_id"]), row["role_name"],
                                  bool(int(row["user_editable"])), tuple()))
                         return {
@@ -219,12 +218,12 @@ def assign_role_to_user(resource_id: uuid.UUID) -> Response:
 
             def __assign__(conn: db.DbConnection) -> dict:
                 resource = resource_by_id(conn, the_token.user, resource_id)
-                rgroup = resource_group(conn, resource).maybe(
-                    None, lambda grp: grp)
                 user = user_by_email(conn, user_email)
                 return assign_resource_user(
                     conn, resource, user,
-                    group_role_by_id(conn, rgroup, uuid.UUID(group_role_id)))
+                    group_role_by_id(conn,
+                                     resource_group(conn, resource),
+                                     uuid.UUID(group_role_id)))
         except AssertionError as aserr:
             raise AuthorisationError(aserr.args[0]) from aserr
 
@@ -244,11 +243,10 @@ def unassign_role_to_user(resource_id: uuid.UUID) -> Response:
 
             def __assign__(conn: db.DbConnection) -> dict:
                 resource = resource_by_id(conn, the_token.user, resource_id)
-                rgroup = resource_group(conn, resource).maybe(
-                    None, lambda grp: grp)
                 return unassign_resource_user(
                     conn, resource, user_by_id(conn, uuid.UUID(user_id)),
-                    group_role_by_id(conn, rgroup,
+                    group_role_by_id(conn,
+                                     resource_group(conn, resource),
                                      uuid.UUID(group_role_id)))
         except AssertionError as aserr:
             raise AuthorisationError(aserr.args[0]) from aserr

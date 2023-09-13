@@ -384,7 +384,7 @@ def save_resource(
     raise AuthorisationError(
         "You do not have the appropriate privileges to edit this resource.")
 
-def resource_group(conn: db.DbConnection, resource: Resource) -> Maybe[Group]:
+def resource_group(conn: db.DbConnection, resource: Resource) -> Group:
     """Return the group that owns the resource."""
     with db.cursor(conn) as cursor:
         cursor.execute(
@@ -394,9 +394,9 @@ def resource_group(conn: db.DbConnection, resource: Resource) -> Maybe[Group]:
             (str(resource.resource_id),))
         row = cursor.fetchone()
         if row:
-            return Just(Group(
+            return Group(
                 UUID(row["group_id"]),
                 row["group_name"],
-                json.loads(row["group_metadata"])))
+                json.loads(row["group_metadata"]))
 
-    return Nothing
+    raise MissingGroupError("Resource has no 'owning' group.")
