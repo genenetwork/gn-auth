@@ -3,7 +3,7 @@ import json
 import sqlite3
 from uuid import UUID, uuid4
 from functools import reduce, partial
-from typing import Any, Dict, Sequence, Optional, NamedTuple
+from typing import Dict, Sequence, Optional
 
 from ...db import sqlite3 as db
 from ...dictify import dictify
@@ -20,38 +20,6 @@ from ..groups.models import (
 class MissingGroupError(AuthorisationError):
     """Raised for any resource operation without a group."""
 
-class ResourceCategory(NamedTuple):
-    """Class representing a resource category."""
-    resource_category_id: UUID
-    resource_category_key: str
-    resource_category_description: str
-
-    def dictify(self) -> dict[str, Any]:
-        """Return a dict representation of `ResourceCategory` objects."""
-        return {
-            "resource_category_id": self.resource_category_id,
-            "resource_category_key": self.resource_category_key,
-            "resource_category_description": self.resource_category_description
-        }
-
-class Resource(NamedTuple):
-    """Class representing a resource."""
-    group: Group
-    resource_id: UUID
-    resource_name: str
-    resource_category: ResourceCategory
-    public: bool
-    resource_data: Sequence[dict[str, Any]] = tuple()
-
-    def dictify(self) -> dict[str, Any]:
-        """Return a dict representation of `Resource` objects."""
-        return {
-            "group": dictify(self.group), "resource_id": self.resource_id,
-            "resource_name": self.resource_name,
-            "resource_category": dictify(self.resource_category),
-            "public": self.public,
-            "resource_data": self.resource_data
-        }
 
 def __assign_resource_owner_role__(cursor, resource, user):
     """Assign `user` the 'Resource Owner' role for `resource`."""
