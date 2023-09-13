@@ -15,30 +15,42 @@ TEST_GROUP_02 = Group(uuid.UUID("e37d59d7-c05e-4d67-b479-81e627d8d634"),
                       "AnotherTestGroup", {})
 TEST_GROUPS = (TEST_GROUP_01, TEST_GROUP_02)
 
+GROUP_CATEGORY = ResourceCategory(
+    uuid.UUID("1e0f70ee-add5-4358-8c6c-43de77fa4cce"),
+    "group",
+    "A group resource.")
+GROUPS_AS_RESOURCES = tuple({
+    "group_id": str(group.group_id),
+    "resource_id": str(uuid.uuid4()),
+    "resource_name": group.group_name,
+    "category_id": str(GROUP_CATEGORY.resource_category_id),
+    "public": "1"
+} for group in TEST_GROUPS)
+
 TEST_RESOURCES_GROUP_01 = (
-    Resource(TEST_GROUPS[0], uuid.UUID("26ad1668-29f5-439d-b905-84d551f85955"),
+    Resource(uuid.UUID("26ad1668-29f5-439d-b905-84d551f85955"),
              "ResourceG01R01",
              ResourceCategory(uuid.UUID("48056f84-a2a6-41ac-8319-0e1e212cba2a"),
                               "genotype", "Genotype Dataset"),
              True),
-    Resource(TEST_GROUPS[0], uuid.UUID("2130aec0-fefd-434d-92fd-9ca342348b2d"),
+    Resource(uuid.UUID("2130aec0-fefd-434d-92fd-9ca342348b2d"),
              "ResourceG01R02",
              ResourceCategory(uuid.UUID("548d684b-d4d1-46fb-a6d3-51a56b7da1b3"),
                               "phenotype", "Phenotype (Publish) Dataset"),
              False),
-    Resource(TEST_GROUPS[0], uuid.UUID("e9a1184a-e8b4-49fb-b713-8d9cbeea5b83"),
+    Resource(uuid.UUID("e9a1184a-e8b4-49fb-b713-8d9cbeea5b83"),
              "ResourceG01R03",
              ResourceCategory(uuid.UUID("fad071a3-2fc8-40b8-992b-cdefe7dcac79"),
                               "mrna", "mRNA Dataset"),
              False))
 
 TEST_RESOURCES_GROUP_02 = (
-    Resource(TEST_GROUPS[1], uuid.UUID("14496a1c-c234-49a2-978c-8859ea274054"),
+    Resource(uuid.UUID("14496a1c-c234-49a2-978c-8859ea274054"),
              "ResourceG02R01",
              ResourceCategory(uuid.UUID("48056f84-a2a6-41ac-8319-0e1e212cba2a"),
                               "genotype", "Genotype Dataset"),
              False),
-    Resource(TEST_GROUPS[1], uuid.UUID("04ad9e09-94ea-4390-8a02-11f92999806b"),
+    Resource(uuid.UUID("04ad9e09-94ea-4390-8a02-11f92999806b"),
              "ResourceG02R02",
              ResourceCategory(uuid.UUID("fad071a3-2fc8-40b8-992b-cdefe7dcac79"),
                               "mrna", "mRNA Dataset"),
@@ -53,16 +65,32 @@ def __gtuple__(cursor):
 @pytest.fixture(scope="function")
 def fxtr_group(conn_after_auth_migrations):# pylint: disable=[redefined-outer-name]
     """Fixture: setup a test group."""
-    query = "INSERT INTO groups(group_id, group_name) VALUES (?, ?)"
     with db.cursor(conn_after_auth_migrations) as cursor:
         cursor.executemany(
-            query, tuple(
+            "INSERT INTO groups(group_id, group_name) VALUES (?, ?)",
+            tuple(
                 (str(group.group_id), group.group_name)
                 for group in TEST_GROUPS))
+
+        cursor.executemany(
+            "INSERT INTO resources "
+            "VALUES(:resource_id, :resource_name, :category_id, :public)",
+            GROUPS_AS_RESOURCES)
+
+        cursor.executemany(
+            "INSERT INTO group_resources(resource_id, group_id) "
+            "VALUES(:resource_id, :group_id)",
+            GROUPS_AS_RESOURCES)
 
     yield (conn_after_auth_migrations, TEST_GROUPS[0])
 
     with db.cursor(conn_after_auth_migrations) as cursor:
+        resource_id_params = tuple(
+            (str(res["resource_id"]),) for res in GROUPS_AS_RESOURCES)
+        cursor.executemany("DELETE FROM group_resources WHERE resource_id=?",
+                           resource_id_params)
+        cursor.executemany("DELETE FROM resources WHERE resource_id=?",
+                           resource_id_params)
         cursor.executemany(
             "DELETE FROM groups WHERE group_id=?",
             ((str(group.group_id),) for group in TEST_GROUPS))
@@ -106,7 +134,6 @@ def fxtr_group_roles(fxtr_group, fxtr_roles):# pylint: disable=[redefined-outer-
     yield conn, groups, group_roles
 
     with db.cursor(conn) as cursor:
-        cursor.execute("SELECT * FROM group_user_roles_on_resources")
         cursor.executemany(
             ("DELETE FROM group_roles "
              "WHERE group_role_id=? AND group_id=? AND role_id=?"),
@@ -127,21 +154,20 @@ def fxtr_group_user_roles(fxtr_resources, fxtr_group_roles, fxtr_users_in_group)
         for user in users if user.email == "group@mem.ber01")
     with db.cursor(conn) as cursor:
         params = tuple({
-            "group_id": str(resource.group.group_id),
             "user_id": str(user.user_id),
             "role_id": str(role.role_id),
             "resource_id": str(resource.resource_id)
         } for user, role, resource in users_roles_resources)
         cursor.executemany(
-            ("INSERT INTO group_user_roles_on_resources "
-             "VALUES (:group_id, :user_id, :role_id, :resource_id)"),
+            ("INSERT INTO user_roles "
+             "VALUES (:user_id, :role_id, :resource_id)"),
             params)
 
     yield conn, group_users, group_roles, group_resources
 
     with db.cursor(conn) as cursor:
         cursor.executemany(
-            ("DELETE FROM group_user_roles_on_resources WHERE "
-             "group_id=:group_id AND user_id=:user_id AND role_id=:role_id AND "
+            ("DELETE FROM user_roles WHERE "
+             "user_id=:user_id AND role_id=:role_id AND "
              "resource_id=:resource_id"),
             params)

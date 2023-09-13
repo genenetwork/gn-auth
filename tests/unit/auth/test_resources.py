@@ -28,7 +28,7 @@ create_resource_failure = {
     tuple(zip(
         conftest.TEST_USERS[0:1],
         (Resource(
-            group, uuid.UUID("d32611e3-07fc-4564-b56c-786c6db6de2b"),
+            uuid.UUID("d32611e3-07fc-4564-b56c-786c6db6de2b"),
             "test_resource", resource_category, False),))))
 def test_create_resource(mocker, fxtr_users_in_group, user, expected):
     """Test that resource creation works as expected."""
@@ -43,11 +43,14 @@ def test_create_resource(mocker, fxtr_users_in_group, user, expected):
     with db.cursor(conn) as cursor:
         # Cleanup
         cursor.execute(
-            "DELETE FROM group_user_roles_on_resources WHERE resource_id=?",
+            "DELETE FROM user_roles WHERE resource_id=?",
+            (str(resource.resource_id),))
+        cursor.execute(
+            "DELETE FROM resource_ownership WHERE resource_id=?",
             (str(resource.resource_id),))
         cursor.execute(
             "DELETE FROM group_roles WHERE group_id=?",
-            (str(resource.group.group_id),))
+            (str(group.group_id),))
         cursor.execute(
             "DELETE FROM resources WHERE resource_id=?",
             (str(resource.resource_id),))

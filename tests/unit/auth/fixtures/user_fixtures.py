@@ -6,6 +6,8 @@ import pytest
 from gn_auth.auth.db import sqlite3 as db
 from gn_auth.auth.authentication.users import User, hash_password
 
+from .group_fixtures import TEST_GROUP_01
+
 TEST_USERS = (
         User(uuid.UUID("ecb52977-3004-469e-9428-2a1856725c7f"), "group@lead.er",
              "Group Leader"),
@@ -17,19 +19,35 @@ TEST_USERS = (
              "unaff@iliated.user", "Unaffiliated User"))
 
 @pytest.fixture(scope="function")
-def fxtr_users(conn_after_auth_migrations):# pylint: disable=[redefined-outer-name]
+def fxtr_users(conn_after_auth_migrations, fxtr_group):# pylint: disable=[redefined-outer-name, unused-argument]
     """Fixture: setup test users."""
     query = "INSERT INTO users(user_id, email, name) VALUES (?, ?, ?)"
-    query_user_roles = "INSERT INTO user_roles(user_id, role_id) VALUES (?, ?)"
-    test_user_roles = (
-        ("ecb52977-3004-469e-9428-2a1856725c7f",
-         "a0e67630-d502-4b9f-b23f-6805d0f30e30"),
-        ("ecb52977-3004-469e-9428-2a1856725c7f",
-         "ade7e6b0-ba9c-4b51-87d0-2af7fe39a347"))
     with db.cursor(conn_after_auth_migrations) as cursor:
         cursor.executemany(query, (
             (str(user.user_id), user.email, user.name) for user in TEST_USERS))
-        cursor.executemany(query_user_roles, test_user_roles)
+        # setup user roles
+        cursor.execute("SELECT * FROM group_resources")
+        g01res_id = {
+            row["group_id"]: row["resource_id"]
+            for row in cursor.fetchall()
+        }[str(TEST_GROUP_01.group_id)]
+        cursor.execute("SELECT * FROM resources WHERE resource_name='GeneNetwork System'")
+        sysres_id = cursor.fetchone()["resource_id"]
+        test_user_roles = (
+            {
+                "user_id": "ecb52977-3004-469e-9428-2a1856725c7f",
+                "role_id": "a0e67630-d502-4b9f-b23f-6805d0f30e30",# group-leader
+                "resource_id": g01res_id
+            },
+            {
+                "user_id": "ecb52977-3004-469e-9428-2a1856725c7f",
+                "role_id": "ade7e6b0-ba9c-4b51-87d0-2af7fe39a347",# group-creator
+                "resource_id": sysres_id
+            })
+        cursor.executemany(
+            "INSERT INTO user_roles(user_id, role_id, resource_id) "
+            "VALUES (:user_id, :role_id, :resource_id)",
+            test_user_roles)
 
     yield (conn_after_auth_migrations, TEST_USERS)
 
