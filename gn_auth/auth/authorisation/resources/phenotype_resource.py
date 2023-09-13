@@ -5,6 +5,7 @@ from typing import Optional, Sequence
 import sqlite3
 
 import gn_auth.auth.db.sqlite3 as db
+from gn_auth.auth.authorisation.groups import Group
 
 from .base import Resource
 from .data import __attach_data__
@@ -27,11 +28,12 @@ def resource_data(
 def link_data_to_resource(
         conn: db.DbConnection,
         resource: Resource,
+        group: Group,
         data_link_id: uuid.UUID) -> dict:
     """Link Phenotype data with a resource."""
     with db.cursor(conn) as cursor:
         params = {
-            "group_id": str(resource.group.group_id),
+            "group_id": str(group.group_id),
             "resource_id": str(resource.resource_id),
             "data_link_id": str(data_link_id)
         }

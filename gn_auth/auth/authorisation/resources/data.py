@@ -22,8 +22,7 @@ def __attach_data__(
         }
     organised: dict[UUID, tuple[dict, ...]] = reduce(__organise__, data_rows, {})
     return tuple(
-        Resource(
-            resource.group, resource.resource_id, resource.resource_name,
-            resource.resource_category, resource.public,
-            organised.get(resource.resource_id, tuple()))
+        Resource(resource.resource_id, resource.resource_name,
+                 resource.resource_category, resource.public,
+                 organised.get(resource.resource_id, tuple()))
         for resource in resources)

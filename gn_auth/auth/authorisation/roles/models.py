@@ -136,6 +136,9 @@ def assign_default_roles(cursor: db.DbCursor, user: User):
 
 def revoke_user_role_by_name(cursor: db.DbCursor, user: User, role_name: str):
     """Revoke a role from `user` by the role's name"""
+    # TODO: Pass in the resource_id - this works somewhat correctly, but it's
+    #       only because it is used in for revoking the "group-creator" role so
+    #       far
     cursor.execute(
         "SELECT role_id FROM roles WHERE role_name=:role_name",
         {"role_name": role_name})
@@ -146,7 +149,8 @@ def revoke_user_role_by_name(cursor: db.DbCursor, user: User, role_name: str):
              "WHERE user_id=:user_id AND role_id=:role_id"),
             {"user_id": str(user.user_id), "role_id": role["role_id"]})
 
-def assign_user_role_by_name(cursor: db.DbCursor, user: User, role_name: str):
+def assign_user_role_by_name(
+        cursor: db.DbCursor, user: User, resource_id: UUID, role_name: str):
     """Revoke a role from `user` by the role's name"""
     cursor.execute(
         "SELECT role_id FROM roles WHERE role_name=:role_name",
@@ -155,6 +159,10 @@ def assign_user_role_by_name(cursor: db.DbCursor, user: User, role_name: str):
 
     if role:
         cursor.execute(
-            ("INSERT INTO user_roles VALUES(:user_id, :role_id) "
+            ("INSERT INTO user_roles VALUES(:user_id, :role_id, :resource_id) "
              "ON CONFLICT DO NOTHING"),
-            {"user_id": str(user.user_id), "role_id": role["role_id"]})
+            {
+                "user_id": str(user.user_id),
+                "role_id": role["role_id"],
+                "resource_id": str(resource_id)
+            })

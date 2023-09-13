@@ -30,13 +30,12 @@ def link_data_to_resource(
     """Link mRNA Assay data with a resource."""
     with db.cursor(conn) as cursor:
         params = {
-            "group_id": str(resource.group.group_id),
             "resource_id": str(resource.resource_id),
             "data_link_id": str(data_link_id)
         }
         cursor.execute(
             "INSERT INTO mrna_resources VALUES"
-            "(:group_id, :resource_id, :data_link_id)",
+            "(:resource_id, :data_link_id)",
             params)
         return params
 

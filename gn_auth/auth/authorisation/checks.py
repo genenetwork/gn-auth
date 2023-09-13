@@ -10,7 +10,7 @@ from .errors import InvalidData, AuthorisationError
 from ..db import sqlite3 as db
 from ..authentication.oauth2.resource_server import require_oauth
 
-def __system_privileges_in_roles__(conn, user):
+def __system_privileges_in_roles__(conn, user): # TODO: Remove this hack.
     """
     This really is a hack since groups are not treated as resources at the
     moment of writing this.
@@ -19,12 +19,11 @@ def __system_privileges_in_roles__(conn, user):
     """
     query = (
         "SELECT DISTINCT p.* FROM users AS u "
-        "INNER JOIN group_user_roles_on_resources AS guror "
-        "ON u.user_id=guror.user_id "
-        "INNER JOIN roles AS r ON guror.role_id=r.role_id "
+        "INNER JOIN user_roles AS ur ON u.user_id=ur.user_id "
+        "INNER JOIN roles AS r ON ur.role_id=r.role_id "
         "INNER JOIN role_privileges AS rp ON r.role_id=rp.role_id "
         "INNER JOIN privileges AS p ON rp.privilege_id=p.privilege_id "
-        "WHERE u.user_id=? AND p.privilege_id LIKE 'system:%'")
+        "WHERE u.user_id=? AND p.privilege_id LIKE 'system:%';")
     with db.cursor(conn) as cursor:
         cursor.execute(query, (str(user.user_id),))
         return (row["privilege_id"] for row in cursor.fetchall())

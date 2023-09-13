@@ -4,8 +4,6 @@ from uuid import UUID, uuid4
 from functools import reduce, partial
 from typing import Dict, Sequence, Optional
 
-from pymonad.maybe import Just, Maybe, Nothing
-
 from ...db import sqlite3 as db
 from ...dictify import dictify
 from ...authentication.users import User
@@ -13,8 +11,7 @@ from ...db.sqlite3 import with_db_connection
 
 from ..checks import authorised_p
 from ..errors import NotFoundError, AuthorisationError
-from ..groups.models import (
-    Group, GroupRole, user_group, group_by_id, is_group_leader)
+from ..groups.models import Group, GroupRole, user_group, is_group_leader
 
 from .checks import authorised_for
 from .base import Resource, ResourceCategory
@@ -56,14 +53,13 @@ def __assign_resource_owner_role__(cursor, resource, user, group):
              "role_id": role["role_id"]})
 
     cursor.execute(
-            "INSERT INTO group_user_roles_on_resources "
-            "VALUES ("
-            ":group_id, :user_id, :role_id, :resource_id"
-            ")",
-            {"group_id": str(resource.group_id),
-             "user_id": str(user.user_id),
-             "role_id": role["role_id"],
-             "resource_id": str(resource.resource_id)})
+            "INSERT INTO user_roles "
+            "VALUES (:user_id, :role_id, :resource_id)",
+            {
+                "user_id": str(user.user_id),
+                "role_id": role["role_id"],
+                "resource_id": str(resource.resource_id)
+            })
 
 @authorised_p(("group:resource:create-resource",),
               error_description="Insufficient privileges to create a resource",
@@ -128,18 +124,8 @@ def public_resources(conn: db.DbConnection) -> Sequence[Resource]:
     with db.cursor(conn) as cursor:
         cursor.execute("SELECT * FROM resources WHERE public=1")
         results = cursor.fetchall()
-        group_uuids = tuple(row[0] for row in results)
-        query = ("SELECT * FROM groups WHERE group_id IN "
-                 f"({', '.join(['?'] * len(group_uuids))})")
-        cursor.execute(query, group_uuids)
-        groups = {
-            row[0]: Group(
-                UUID(row[0]), row[1], json.loads(row[2] or "{}"))
-            for row in cursor.fetchall()
-        }
         return tuple(
-            Resource(groups[row[0]], UUID(row[1]), row[2], categories[row[3]],
-                     bool(row[4]))
+            Resource(UUID(row[0]), row[1], categories[row[2]], bool(row[3]))
             for row in results)
 
 def group_leader_resources(
@@ -148,11 +134,14 @@ def group_leader_resources(
     """Return all the resources available to the group leader"""
     if is_group_leader(conn, user, group):
         with db.cursor(conn) as cursor:
-            cursor.execute("SELECT * FROM resources WHERE group_id=?",
-                           (str(group.group_id),))
+            cursor.execute(
+                "SELECT r.* FROM resource_ownership AS ro "
+                "INNER JOIN resources AS r "
+                "WHERE ro.group_id=?",
+                (str(group.group_id),))
             return tuple(
-                Resource(group, UUID(row[1]), row[2],
-                         res_categories[UUID(row[3])], bool(row[4]))
+                Resource(UUID(row[0]), row[1],
+                         res_categories[UUID(row[2])], bool(row[3]))
                 for row in cursor.fetchall())
     return tuple()
 
@@ -166,16 +155,14 @@ def user_resources(conn: db.DbConnection, user: User) -> Sequence[Resource]:
             gl_resources = group_leader_resources(conn, user, group, categories)
 
             cursor.execute(
-                ("SELECT resources.* FROM group_user_roles_on_resources "
-                 "LEFT JOIN resources "
-                 "ON group_user_roles_on_resources.resource_id=resources.resource_id "
-                 "WHERE group_user_roles_on_resources.group_id = ? "
-                 "AND group_user_roles_on_resources.user_id = ?"),
-                (str(group.group_id), str(user.user_id)))
+                ("SELECT resources.* FROM user_roles LEFT JOIN resources "
+                 "ON user_roles.resource_id=resources.resource_id "
+                 "WHERE user_roles.user_id=?"),
+                (str(user.user_id),))
             rows = cursor.fetchall()
             private_res = tuple(
-                Resource(group, UUID(row[1]), row[2], categories[UUID(row[3])],
-                         bool(row[4]))
+                Resource(UUID(row[0]), row[1], categories[UUID(row[2])],
+                         bool(row[3]))
                 for row in rows)
             return tuple({
                 res.resource_id: res
@@ -216,7 +203,7 @@ def attach_resource_data(cursor: db.DbCursor, resource: Resource) -> Resource:
         resource_data_function[category.resource_category_key](
             cursor, resource.resource_id))
     return Resource(
-        resource.group, resource.resource_id, resource.resource_name,
+        resource.resource_id, resource.resource_name,
         resource.resource_category, resource.public, data_rows)
 
 def resource_by_id(
@@ -235,7 +222,6 @@ def resource_by_id(
         row = cursor.fetchone()
         if row:
             return Resource(
-                group_by_id(conn, UUID(row["group_id"])),
                 UUID(row["resource_id"]), row["resource_name"],
                 resource_category_by_id(conn, row["resource_category_id"]),
                 bool(int(row["public"])))
@@ -255,11 +241,12 @@ def link_data_to_resource(
 
     resource = with_db_connection(partial(
         resource_by_id, user=user, resource_id=resource_id))
-    return {
+    return {# type: ignore[operator]
         "mrna": mrna_link_data_to_resource,
         "genotype": genotype_link_data_to_resource,
         "phenotype": phenotype_link_data_to_resource,
-    }[dataset_type.lower()](conn, resource, data_link_id)
+    }[dataset_type.lower()](
+        conn, resource, resource_group(conn, resource), data_link_id)
 
 def unlink_data_from_resource(
         conn: db.DbConnection, user: User, resource_id: UUID, data_link_id: UUID):
@@ -319,14 +306,12 @@ def assign_resource_user(
     """Assign `role` to `user` for the specific `resource`."""
     with db.cursor(conn) as cursor:
         cursor.execute(
-            "INSERT INTO "
-            "group_user_roles_on_resources(group_id, user_id, role_id, "
-            "resource_id) "
-            "VALUES (?, ?, ?, ?) "
-            "ON CONFLICT (group_id, user_id, role_id, resource_id) "
+            "INSERT INTO user_roles(user_id, role_id, resource_id)"
+            "VALUES (?, ?, ?) "
+            "ON CONFLICT (user_id, role_id, resource_id) "
             "DO NOTHING",
-            (str(resource.group.group_id), str(user.user_id),
-             str(role.role.role_id), str(resource.resource_id)))
+            (str(user.user_id), str(role.role.role_id),
+             str(resource.resource_id)))
         return {
             "resource": dictify(resource),
             "user": dictify(user),
@@ -346,10 +331,11 @@ def unassign_resource_user(
     """Assign `role` to `user` for the specific `resource`."""
     with db.cursor(conn) as cursor:
         cursor.execute(
-            "DELETE FROM group_user_roles_on_resources "
-            "WHERE group_id=? AND user_id=? AND role_id=? AND resource_id=?",
-            (str(resource.group.group_id), str(user.user_id),
-             str(role.role.role_id), str(resource.resource_id)))
+            "DELETE FROM user_roles "
+            "WHERE user_id=? AND role_id=? AND resource_id=?",
+            (str(user.user_id),
+             str(role.role.role_id),
+             str(resource.resource_id)))
         return {
             "resource": dictify(resource),
             "user": dictify(user),
@@ -371,12 +357,10 @@ def save_resource(
                 "UPDATE resources SET "
                 "resource_name=:resource_name, "
                 "public=:public "
-                "WHERE group_id=:group_id "
-                "AND resource_id=:resource_id",
+                "WHERE resource_id=:resource_id",
                 {
                     "resource_name": resource.resource_name,
                     "public": 1 if resource.public else 0,
-                    "group_id": str(resource.group.group_id),
                     "resource_id": str(resource.resource_id)
                 })
             return resource

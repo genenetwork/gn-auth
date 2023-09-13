@@ -89,6 +89,19 @@ def create_group(
         conn: db.DbConnection, group_name: str, group_leader: User,
         group_description: Optional[str] = None) -> Group:
     """Create a new group."""
+    def resource_category_by_key(
+        cursor: db.DbCursor, category_key: str):
+        """Retrieve a resource category by its key."""
+        cursor.execute(
+            "SELECT * FROM resource_categories WHERE "
+            "resource_category_key=?",
+            (category_key,))
+        results = cursor.fetchone()
+        if results:
+            return dict(results)
+        raise NotFoundError(
+            f"Could not find a ResourceCategory with key '{category_key}'")
+
     user_groups = user_membership(conn, group_leader)
     if len(user_groups) > 0:
         raise MembershipError(group_leader, user_groups)
@@ -98,9 +111,29 @@ def create_group(
             cursor, group_name,(
                 {"group_description": group_description}
                 if group_description else {}))
+        group_resource = {
+            "group_id": str(new_group.group_id),
+            "resource_id": str(uuid4()),
+            "resource_name": group_name,
+            "resource_category_id": str(
+                resource_category_by_key(cursor, "group")["resource_category_id"]),
+            "public": 0
+        }
+        cursor.execute(
+            "INSERT INTO resources VALUES "
+            "(:resource_id, :resource_name, :resource_category_id, :public)",
+            group_resource)
+        cursor.execute(
+            "INSERT INTO group_resources(resource_id, group_id) "
+            "VALUES(:resource_id, :group_id)",
+            group_resource)
         add_user_to_group(cursor, new_group, group_leader)
         revoke_user_role_by_name(cursor, group_leader, "group-creator")
-        assign_user_role_by_name(cursor, group_leader, "group-leader")
+        assign_user_role_by_name(
+            cursor,
+            group_leader,
+            UUID(str(group_resource["resource_id"])),
+            "group-leader")
         return new_group
 
 @authorised_p(("group:role:create-role",),
@@ -208,8 +241,8 @@ def save_group(
          "VALUES(:group_id, :group_name, :group_metadata) "
          "ON CONFLICT (group_id) DO UPDATE SET "
          "group_name=:group_name, group_metadata=:group_metadata"),
-    {"group_id": str(the_group.group_id), "group_name": the_group.group_name,
-     "group_metadata": json.dumps(the_group.group_metadata)})
+        {"group_id": str(the_group.group_id), "group_name": the_group.group_name,
+         "group_metadata": json.dumps(the_group.group_metadata)})
     return the_group
 
 def add_user_to_group(cursor: db.DbCursor, the_group: Group, user: User):

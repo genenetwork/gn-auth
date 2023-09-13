@@ -86,10 +86,31 @@ def admin_group(conn: authdb.DbConnection, admin: User) -> Group:
                 "Existing data was migrated into this group and assigned "
                 "to publicly visible resources according to type.")
         })
+
+        cursor.execute(
+            "SELECT * FROM resource_categories WHERE "
+            "resource_category_key='group'")
+        res_cat_id = cursor.fetchone()["resource_category_id"]
+        grp_res = {
+            "group_id": str(new_group.group_id),
+            "resource_id": str(uuid4()),
+            "resource_name": new_group.group_name,
+            "resource_category_id": res_cat_id,
+            "public": 0
+        }
+        cursor.execute(
+            "INSERT INTO resources VALUES "
+            "(:resource_id, :resource_name, :resource_category_id, :public)",
+            grp_res)
+        cursor.execute(
+            "INSERT INTO group_resources(resource_id, group_id) "
+            "VALUES(:resource_id, :group_id)",
+            grp_res)
         cursor.execute("INSERT INTO group_users VALUES (?, ?)",
                        (str(new_group.group_id), str(admin.user_id)))
         revoke_user_role_by_name(cursor, admin, "group-creator")
-        assign_user_role_by_name(cursor, admin, "group-leader")
+        assign_user_role_by_name(
+            cursor, admin, UUID(grp_res["resource_id"]), "group-leader")
         return new_group
 
 def __resource_category_by_key__(
@@ -110,7 +131,7 @@ def __create_resources__(cursor: authdb.DbCursor, group: Group) -> tuple[
         Resource, ...]:
     """Create default resources."""
     resources = tuple(Resource(
-        group, uuid4(), name, __resource_category_by_key__(cursor, catkey),
+        uuid4(), name, __resource_category_by_key__(cursor, catkey),
         True, tuple()
     ) for name, catkey in (
         ("mRNA-euhrin", "mrna"),
@@ -125,6 +146,12 @@ def __create_resources__(cursor: authdb.DbCursor, group: Group) -> tuple[
             "rcid": str(res.resource_category.resource_category_id),
             "pub": 1
         } for res in resources))
+    cursor.executemany("INSERT INTO resource_ownership(group_id, resource_id) "
+                       "VALUES (:group_id, :resource_id)",
+                       tuple({
+                           "group_id": str(group.group_id),
+                           "resource_id": str(resource.resource_id)
+                       } for resource in resources))
     return resources
 
 def default_resources(conn: authdb.DbConnection, group: Group) -> tuple[
@@ -143,7 +170,6 @@ def default_resources(conn: authdb.DbConnection, group: Group) -> tuple[
             return __create_resources__(cursor, group)
 
         return tuple(Resource(
-            group,
             UUID(row["resource_id"]),
             row["resource_name"],
             ResourceCategory(
@@ -360,12 +386,14 @@ def entry(authdbpath, mysqldburi):
         with (authdb.connection(authdbpath) as authconn,
               biodb.database_connection(mysqldburi) as bioconn):
             admin = select_sys_admin(sys_admins(authconn))
+            the_admin_group = admin_group(authconn, admin)
             resources = default_resources(
-                authconn, admin_group(authconn, admin))
+                authconn, the_admin_group)
             for resource in resources:
                 assign_data_to_resource(authconn, bioconn, resource)
                 with authdb.cursor(authconn) as cursor:
-                    __assign_resource_owner_role__(cursor, resource, admin)
+                    __assign_resource_owner_role__(
+                        cursor, resource, admin, the_admin_group)
     except DataNotFound as dnf:
         print(dnf.args[0], file=sys.stderr)
         sys.exit(1)
