@@ -4,12 +4,12 @@ from typing import Iterable
 
 from MySQLdb.cursors import DictCursor
 
-from ..checks import authorised_p
-from ..groups.models import Group
+from gn_auth.auth.dictify import dictify
+from gn_auth.auth.db import mariadb as gn3db
+from gn_auth.auth.db import sqlite3 as authdb
 
-from ...dictify import dictify
-from ...db import mariadb as gn3db
-from ...db import sqlite3 as authdb
+from gn_auth.auth.authorisation.checks import authorised_p
+from gn_auth.auth.authorisation.resources.groups.models import Group
 
 def linked_genotype_data(conn: authdb.DbConnection) -> Iterable[dict]:
     """Retrive genotype data that is linked to user groups."""

@@ -5,8 +5,8 @@ import pytest
 
 from gn_auth.auth.db import sqlite3 as db
 
-from gn_auth.auth.authorisation.groups import Group
 from gn_auth.auth.authorisation.errors import AuthorisationError
+from gn_auth.auth.authorisation.resources.groups import Group
 from gn_auth.auth.authorisation.resources.models import (
     Resource, user_resources, create_resource, ResourceCategory,
     public_resources)

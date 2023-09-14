@@ -7,8 +7,8 @@ from .authorisation.data.views import data
 from .authorisation.users.views import users
 from .authorisation.users.admin import admin
 from .authorisation.roles.views import roles
-from .authorisation.groups.views import groups
 from .authorisation.resources.views import resources
+from .authorisation.resources.groups.views import groups
 
 oauth2 = Blueprint("oauth2", __name__)
 

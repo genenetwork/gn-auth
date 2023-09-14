@@ -1,4 +1,6 @@
-"""The views/routes for the `gn3.auth.authorisation.groups` package."""
+"""
+The views/routes for the `gn3.auth.authorisation.resources.groups` package.
+"""
 import uuid
 import datetime
 from typing import Iterable
@@ -7,11 +9,20 @@ from functools import partial
 from MySQLdb.cursors import DictCursor
 from flask import request, jsonify, Response, Blueprint, current_app
 
-from ...db import sqlite3 as db
-from ...db import mariadb as gn3db
+from gn_auth.auth.db import sqlite3 as db
+from gn_auth.auth.db import mariadb as gn3db
+from gn_auth.auth.db.sqlite3 import with_db_connection
+from gn_auth.auth.dictify import dictify
 
-from ...dictify import dictify
-from ...db.sqlite3 import with_db_connection
+from gn_auth.auth.authorisation.roles.models import Role
+from gn_auth.auth.authorisation.roles.models import user_roles
+
+from gn_auth.auth.authorisation.checks import authorised_p
+from gn_auth.auth.authorisation.privileges import Privilege, privileges_by_ids
+from gn_auth.auth.authorisation.errors import InvalidData, NotFoundError, AuthorisationError
+
+from gn_auth.auth.authentication.users import User
+from gn_auth.auth.authentication.oauth2.resource_server import require_oauth
 
 from .data import link_data_to_group
 from .models import (
@@ -20,16 +31,6 @@ from .models import (
     accept_reject_join_request, group_users as _group_users,
     create_group as _create_group, add_privilege_to_group_role,
     delete_privilege_from_group_role, create_group_role as _create_group_role)
-
-from ..roles.models import Role
-from ..roles.models import user_roles
-
-from ..checks import authorised_p
-from ..privileges import Privilege, privileges_by_ids
-from ..errors import InvalidData, NotFoundError, AuthorisationError
-
-from ...authentication.users import User
-from ...authentication.oauth2.resource_server import require_oauth
 
 groups = Blueprint("groups", __name__)
 

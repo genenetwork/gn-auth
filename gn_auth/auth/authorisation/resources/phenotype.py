@@ -5,8 +5,8 @@ from typing import Optional, Sequence
 import sqlite3
 
 import gn_auth.auth.db.sqlite3 as db
-from gn_auth.auth.authorisation.groups import Group
 
+from .groups import Group
 from .base import Resource
 from .data import __attach_data__
 

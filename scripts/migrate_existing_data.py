@@ -16,9 +16,10 @@ from gn_auth.auth.db import mariadb as biodb
 
 import gn_auth.auth.db.sqlite3 as authdb
 from gn_auth.auth.authentication.users import User
-from gn_auth.auth.authorisation.groups.models import Group, save_group
 from gn_auth.auth.authorisation.roles.models import (
     revoke_user_role_by_name, assign_user_role_by_name)
+
+from gn_auth.auth.authorisation.resources.groups.models import Group, save_group
 from gn_auth.auth.authorisation.resources.models import (
     Resource, ResourceCategory, __assign_resource_owner_role__)
 

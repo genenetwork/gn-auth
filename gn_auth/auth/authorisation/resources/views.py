@@ -6,23 +6,23 @@ from functools import reduce
 
 from flask import request, jsonify, Response, Blueprint, current_app as app
 
-from ...db import sqlite3 as db
-from ...db.sqlite3 import with_db_connection
+from gn_auth.auth.db import sqlite3 as db
+from gn_auth.auth.db.sqlite3 import with_db_connection
+
+from gn_auth.auth.authorisation.roles import Role
+from gn_auth.auth.authorisation.errors import InvalidData, InconsistencyError, AuthorisationError
+
+from gn_auth.auth.dictify import dictify
+from gn_auth.auth.authentication.oauth2.resource_server import require_oauth
+from gn_auth.auth.authentication.users import User, user_by_id, user_by_email
 
 from .checks import authorised_for
 from .models import (
-    Resource, save_resource, resource_data, resource_group, resource_by_id,
+    Resource, save_resource, resource_data, resource_by_id,
     resource_categories, assign_resource_user, link_data_to_resource,
     unassign_resource_user, resource_category_by_id, unlink_data_from_resource,
     create_resource as _create_resource)
-
-from ..roles import Role
-from ..errors import InvalidData, InconsistencyError, AuthorisationError
-from ..groups.models import Group, GroupRole, group_role_by_id
-
-from ...dictify import dictify
-from ...authentication.oauth2.resource_server import require_oauth
-from ...authentication.users import User, user_by_id, user_by_email
+from .groups.models import Group, GroupRole, resource_owner, group_role_by_id
 
 resources = Blueprint("resources", __name__)
 
@@ -165,7 +165,7 @@ def resource_users(resource_id: uuid.UUID):
                             "user", User(user_id, row["email"], row["name"]))
                         role = GroupRole(
                             uuid.UUID(row["group_role_id"]),
-                            resource_group(conn, resource),
+                            resource_owner(conn, resource),
                             Role(uuid.UUID(row["role_id"]), row["role_name"],
                                  bool(int(row["user_editable"])), tuple()))
                         return {
@@ -222,7 +222,7 @@ def assign_role_to_user(resource_id: uuid.UUID) -> Response:
                 return assign_resource_user(
                     conn, resource, user,
                     group_role_by_id(conn,
-                                     resource_group(conn, resource),
+                                     resource_owner(conn, resource),
                                      uuid.UUID(group_role_id)))
         except AssertionError as aserr:
             raise AuthorisationError(aserr.args[0]) from aserr
@@ -246,7 +246,7 @@ def unassign_role_to_user(resource_id: uuid.UUID) -> Response:
                 return unassign_resource_user(
                     conn, resource, user_by_id(conn, uuid.UUID(user_id)),
                     group_role_by_id(conn,
-                                     resource_group(conn, resource),
+                                     resource_owner(conn, resource),
                                      uuid.UUID(group_role_id)))
         except AssertionError as aserr:
             raise AuthorisationError(aserr.args[0]) from aserr

@@ -9,7 +9,7 @@ from gn_auth.auth.authentication.users import User
 from gn_auth.auth.authorisation.roles import Role
 from gn_auth.auth.authorisation.privileges import Privilege
 from gn_auth.auth.authorisation.errors import AuthorisationError
-from gn_auth.auth.authorisation.groups.models import (
+from gn_auth.auth.authorisation.resources.groups.models import (
     Group, GroupRole, user_group, create_group, create_group_role)
 
 from tests.unit.auth import conftest
@@ -43,7 +43,7 @@ def test_create_group(# pylint: disable=[too-many-arguments]
     THEN: verify they are only able to create the group if they have the
           appropriate privileges
     """
-    mocker.patch("gn_auth.auth.authorisation.groups.models.uuid4", conftest.uuid_fn)
+    mocker.patch("gn_auth.auth.authorisation.resources.groups.models.uuid4", conftest.uuid_fn)
     mocker.patch("gn_auth.auth.authorisation.checks.require_oauth.acquire",
                  conftest.get_tokeniser(user))
     with db.connection(auth_testdb_path) as conn:
@@ -59,7 +59,7 @@ def test_create_group_raises_exception_with_non_privileged_user(# pylint: disabl
     WHEN: the user attempts to create a group
     THEN: verify the system raises an exception
     """
-    mocker.patch("gn_auth.auth.authorisation.groups.models.uuid4", conftest.uuid_fn)
+    mocker.patch("gn_auth.auth.authorisation.resources.groups.models.uuid4", conftest.uuid_fn)
     mocker.patch("gn_auth.auth.authorisation.checks.require_oauth.acquire",
                  conftest.get_tokeniser(user))
     with db.connection(auth_testdb_path) as conn:
@@ -86,7 +86,7 @@ def test_create_group_role(mocker, fxtr_users_in_group, user, expected):
     THEN: verify they are only able to create the role if they have the
         appropriate privileges and that the role is attached to the given group
     """
-    mocker.patch("gn_auth.auth.authorisation.groups.models.uuid4", conftest.uuid_fn)
+    mocker.patch("gn_auth.auth.authorisation.resources.groups.models.uuid4", conftest.uuid_fn)
     mocker.patch("gn_auth.auth.authorisation.roles.models.uuid4", conftest.uuid_fn)
     mocker.patch("gn_auth.auth.authorisation.checks.require_oauth.acquire",
                  conftest.get_tokeniser(user))
@@ -112,7 +112,7 @@ def test_create_group_role_raises_exception_with_unauthorised_users(
     THEN: verify they are only able to create the role if they have the
         appropriate privileges and that the role is attached to the given group
     """
-    mocker.patch("gn_auth.auth.authorisation.groups.models.uuid4", conftest.uuid_fn)
+    mocker.patch("gn_auth.auth.authorisation.resources.groups.models.uuid4", conftest.uuid_fn)
     mocker.patch("gn_auth.auth.authorisation.roles.models.uuid4", conftest.uuid_fn)
     mocker.patch("gn_auth.auth.authorisation.checks.require_oauth.acquire",
                  conftest.get_tokeniser(user))
@@ -130,7 +130,7 @@ def test_create_multiple_groups(mocker, fxtr_users):
     THEN: The system should prevent that, and respond with an appropriate error
       message
     """
-    mocker.patch("gn_auth.auth.authorisation.groups.models.uuid4", conftest.uuid_fn)
+    mocker.patch("gn_auth.auth.authorisation.resources.groups.models.uuid4", conftest.uuid_fn)
     user = User(
         UUID("ecb52977-3004-469e-9428-2a1856725c7f"), "group@lead.er",
         "Group Leader")

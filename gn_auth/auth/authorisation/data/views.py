@@ -13,14 +13,14 @@ from flask import request, jsonify, Response, Blueprint, current_app as app
 from gn_auth import jobs
 from gn_auth.commands import run_async_cmd
 
+from gn_auth.auth.authorisation.resources.groups.models import group_by_id
+
 from ...db import sqlite3 as db
 from ...db import mariadb as gn3db
 from ...db.sqlite3 import with_db_connection
 
 from ..checks import require_json
 from ..errors import InvalidData, NotFoundError
-
-from ..groups.models import group_by_id
 
 from ..users.models import user_resource_roles
 

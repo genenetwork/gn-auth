@@ -1,38 +1,37 @@
 """Handle the management of resources."""
-import json
 from uuid import UUID, uuid4
 from functools import reduce, partial
 from typing import Dict, Sequence, Optional
 
-from ...db import sqlite3 as db
-from ...dictify import dictify
-from ...authentication.users import User
-from ...db.sqlite3 import with_db_connection
+from gn_auth.auth.db import sqlite3 as db
+from gn_auth.auth.dictify import dictify
+from gn_auth.auth.authentication.users import User
+from gn_auth.auth.db.sqlite3 import with_db_connection
 
-from ..checks import authorised_p
-from ..errors import NotFoundError, AuthorisationError
-from ..groups.models import Group, GroupRole, user_group, is_group_leader
+from gn_auth.auth.authorisation.checks import authorised_p
+from gn_auth.auth.authorisation.errors import NotFoundError, AuthorisationError
 
 from .checks import authorised_for
 from .base import Resource, ResourceCategory
-from .mrna_resource import (
+from .groups.models import (
+    Group, GroupRole, user_group, resource_owner, is_group_leader)
+from .mrna import (
     resource_data as mrna_resource_data,
     attach_resources_data as mrna_attach_resources_data,
     link_data_to_resource as mrna_link_data_to_resource,
     unlink_data_from_resource as mrna_unlink_data_from_resource)
-from .genotype_resource import (
+from .genotype import (
     resource_data as genotype_resource_data,
     attach_resources_data as genotype_attach_resources_data,
     link_data_to_resource as genotype_link_data_to_resource,
     unlink_data_from_resource as genotype_unlink_data_from_resource)
-from .phenotype_resource import (
+from .phenotype import (
     resource_data as phenotype_resource_data,
     attach_resources_data as phenotype_attach_resources_data,
     link_data_to_resource as phenotype_link_data_to_resource,
     unlink_data_from_resource as phenotype_unlink_data_from_resource)
 
-class MissingGroupError(AuthorisationError):
-    """Raised for any resource operation without a group."""
+from .errors import MissingGroupError
 
 def __assign_resource_owner_role__(cursor, resource, user, group):
     """Assign `user` the 'Resource Owner' role for `resource`."""
@@ -73,7 +72,7 @@ def create_resource(
         group = user_group(conn, user).maybe(
             False, lambda grp: grp)# type: ignore[misc, arg-type]
         if not group:
-            raise MissingGroupError(
+            raise MissingGroupError(# Not all resources require an owner group
                 "User with no group cannot create a resource.")
         resource = Resource(uuid4(), resource_name, resource_category, public)
         cursor.execute(
@@ -246,7 +245,7 @@ def link_data_to_resource(
         "genotype": genotype_link_data_to_resource,
         "phenotype": phenotype_link_data_to_resource,
     }[dataset_type.lower()](
-        conn, resource, resource_group(conn, resource), data_link_id)
+        conn, resource, resource_owner(conn, resource), data_link_id)
 
 def unlink_data_from_resource(
         conn: db.DbConnection, user: User, resource_id: UUID, data_link_id: UUID):
@@ -367,20 +366,3 @@ def save_resource(
 
     raise AuthorisationError(
         "You do not have the appropriate privileges to edit this resource.")
-
-def resource_group(conn: db.DbConnection, resource: Resource) -> Group:
-    """Return the group that owns the resource."""
-    with db.cursor(conn) as cursor:
-        cursor.execute(
-            "SELECT g.* FROM resource_ownership AS ro "
-            "INNER JOIN groups AS g ON ro.group_id=g.group_id "
-            "WHERE ro.resource_id=?",
-            (str(resource.resource_id),))
-        row = cursor.fetchone()
-        if row:
-            return Group(
-                UUID(row["group_id"]),
-                row["group_name"],
-                json.loads(row["group_metadata"]))
-
-    raise MissingGroupError("Resource has no 'owning' group.")

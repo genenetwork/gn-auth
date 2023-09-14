@@ -7,23 +7,27 @@ import sqlite3
 from email_validator import validate_email, EmailNotValidError
 from flask import request, jsonify, Response, Blueprint, current_app
 
-from ...db import sqlite3 as db
-from ...dictify import dictify
-from ...db.sqlite3 import with_db_connection
+from gn_auth.auth.db import sqlite3 as db
+from gn_auth.auth.dictify import dictify
+from gn_auth.auth.db.sqlite3 import with_db_connection
+
+from gn_auth.auth.authorisation.resources.models import (
+    user_resources as _user_resources)
+from gn_auth.auth.authorisation.roles.models import (
+    assign_default_roles, user_roles as _user_roles)
+from gn_auth.auth.authorisation.errors import (
+    NotFoundError, UsernameError, PasswordError, UserRegistrationError)
+from gn_auth.auth.authorisation.resources.groups.models import (
+    user_group as _user_group)
+
+from gn_auth.auth.authentication.oauth2.resource_server import require_oauth
+from gn_auth.auth.authentication.users import User, save_user, set_user_password
+from gn_auth.auth.authentication.oauth2.models.oauth2token import (
+    token_by_access_token)
 
 from .models import list_users
 from .masquerade.views import masq
 from .collections.views import collections
-
-from ..groups.models import user_group as _user_group
-from ..resources.models import user_resources as _user_resources
-from ..roles.models import assign_default_roles, user_roles as _user_roles
-from ..errors import (
-    NotFoundError, UsernameError, PasswordError, UserRegistrationError)
-
-from ...authentication.oauth2.resource_server import require_oauth
-from ...authentication.users import User, save_user, set_user_password
-from ...authentication.oauth2.models.oauth2token import token_by_access_token
 
 users = Blueprint("users", __name__)
 users.register_blueprint(masq, url_prefix="/masquerade")

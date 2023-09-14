@@ -7,14 +7,17 @@ from typing import Any, Sequence, Iterable, Optional, NamedTuple
 from flask import g
 from pymonad.maybe import Just, Maybe, Nothing
 
-from ...db import sqlite3 as db
-from ...dictify import dictify
-from ...authentication.users import User, user_by_id
+from gn_auth.auth.db import sqlite3 as db
+from gn_auth.auth.dictify import dictify
+from gn_auth.auth.authentication.users import User, user_by_id
 
-from ..checks import authorised_p
-from ..privileges import Privilege
-from ..errors import NotFoundError, AuthorisationError, InconsistencyError
-from ..roles.models import (
+from gn_auth.auth.authorisation.checks import authorised_p
+from gn_auth.auth.authorisation.privileges import Privilege
+from gn_auth.auth.authorisation.resources.base import Resource
+from gn_auth.auth.authorisation.resources.errors import MissingGroupError
+from gn_auth.auth.authorisation.errors import (
+    NotFoundError, AuthorisationError, InconsistencyError)
+from gn_auth.auth.authorisation.roles.models import (
     Role, create_role, check_user_editable, revoke_user_role_by_name,
     assign_user_role_by_name)
 
@@ -431,3 +434,20 @@ def delete_privilege_from_group_role(
                  group_role.role.user_editable,
                  tuple(priv for priv in group_role.role.privileges
                        if priv != privilege)))
+
+def resource_owner(conn: db.DbConnection, resource: Resource) -> Group:
+    """Return the user group that owns the resource."""
+    with db.cursor(conn) as cursor:
+        cursor.execute(
+            "SELECT g.* FROM resource_ownership AS ro "
+            "INNER JOIN groups AS g ON ro.group_id=g.group_id "
+            "WHERE ro.resource_id=?",
+            (str(resource.resource_id),))
+        row = cursor.fetchone()
+        if row:
+            return Group(
+                UUID(row["group_id"]),
+                row["group_name"],
+                json.loads(row["group_metadata"]))
+
+    raise MissingGroupError("Resource has no 'owning' group.")

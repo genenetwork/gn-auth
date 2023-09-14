@@ -4,7 +4,7 @@ import uuid
 import pytest
 
 from gn_auth.auth.db import sqlite3 as db
-from gn_auth.auth.authorisation.groups import Group, GroupRole
+from gn_auth.auth.authorisation.resources.groups import Group, GroupRole
 from gn_auth.auth.authorisation.resources import Resource, ResourceCategory
 
 from .role_fixtures import RESOURCE_EDITOR_ROLE, RESOURCE_READER_ROLE
