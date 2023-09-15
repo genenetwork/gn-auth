@@ -21,11 +21,14 @@ GROUP_CATEGORY = ResourceCategory(
     "A group resource.")
 GROUPS_AS_RESOURCES = tuple({
     "group_id": str(group.group_id),
-    "resource_id": str(uuid.uuid4()),
+    "resource_id": res_id,
     "resource_name": group.group_name,
     "category_id": str(GROUP_CATEGORY.resource_category_id),
     "public": "1"
-} for group in TEST_GROUPS)
+} for res_id, group in zip(
+    ("38d1807d-105f-44a7-8327-7e2d973b6d8d",
+     "89458ef6-e090-4b53-8c2c-59eaf2785f11"),
+    TEST_GROUPS))
 
 TEST_RESOURCES_GROUP_01 = (
     Resource(uuid.UUID("26ad1668-29f5-439d-b905-84d551f85955"),

@@ -40,6 +40,11 @@ def conn_after_auth_migrations(backend, auth_testdb_path, all_migrations): # pyl
     """Run all migrations and return a connection to the database after"""
     apply_migrations(backend, all_migrations)
     with db.connection(auth_testdb_path) as conn:
+        with db.cursor(conn) as cursor:
+            cursor.execute(
+                "UPDATE resources "
+                "SET resource_id='0248b289-b277-4eaa-8c94-88a434d14b6e' "
+                "WHERE resource_name='GeneNetwork System'")
         yield conn
 
     rollback_migrations(backend, all_migrations)
