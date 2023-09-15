@@ -15,6 +15,16 @@ TEST_GROUP_02 = Group(uuid.UUID("e37d59d7-c05e-4d67-b479-81e627d8d634"),
                       "AnotherTestGroup", {})
 TEST_GROUPS = (TEST_GROUP_01, TEST_GROUP_02)
 
+SYSTEM_CATEGORY = ResourceCategory(
+    uuid.UUID("aa3d787f-af6a-44fa-9b0b-c82d40e54ad2"),
+    "system",
+    "The overall system.")
+SYSTEM_RESOURCE = Resource(
+    uuid.UUID("0248b289-b277-4eaa-8c94-88a434d14b6e"),
+    "GeneNetwork System",
+    SYSTEM_CATEGORY,
+    True)
+
 GROUP_CATEGORY = ResourceCategory(
     uuid.UUID("1e0f70ee-add5-4358-8c6c-43de77fa4cce"),
     "group",
@@ -24,11 +34,17 @@ GROUPS_AS_RESOURCES = tuple({
     "resource_id": res_id,
     "resource_name": group.group_name,
     "category_id": str(GROUP_CATEGORY.resource_category_id),
-    "public": "1"
+    "public": "0"
 } for res_id, group in zip(
     ("38d1807d-105f-44a7-8327-7e2d973b6d8d",
      "89458ef6-e090-4b53-8c2c-59eaf2785f11"),
     TEST_GROUPS))
+GROUP_RESOURCES = tuple(
+    Resource(uuid.UUID(row["resource_id"]),
+             row["resource_name"],
+             GROUP_CATEGORY,
+             False)
+    for row in GROUPS_AS_RESOURCES)
 
 TEST_RESOURCES_GROUP_01 = (
     Resource(uuid.UUID("26ad1668-29f5-439d-b905-84d551f85955"),
@@ -60,7 +76,8 @@ TEST_RESOURCES_GROUP_02 = (
              True))
 
 TEST_RESOURCES = TEST_RESOURCES_GROUP_01 + TEST_RESOURCES_GROUP_02
-TEST_RESOURCES_PUBLIC = (TEST_RESOURCES_GROUP_01[0], TEST_RESOURCES_GROUP_02[1])
+TEST_RESOURCES_PUBLIC = (
+    SYSTEM_RESOURCE, TEST_RESOURCES_GROUP_01[0], TEST_RESOURCES_GROUP_02[1])
 
 def __gtuple__(cursor):
     return tuple(dict(row) for row in cursor.fetchall())

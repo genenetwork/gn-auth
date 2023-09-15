@@ -136,6 +136,7 @@ def group_leader_resources(
             cursor.execute(
                 "SELECT r.* FROM resource_ownership AS ro "
                 "INNER JOIN resources AS r "
+                "ON ro.resource_id=r.resource_id "
                 "WHERE ro.group_id=?",
                 (str(group.group_id),))
             return tuple(
