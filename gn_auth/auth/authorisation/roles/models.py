@@ -115,7 +115,9 @@ def user_role(conn: db.DbConnection, user: User, role_id: UUID) -> Either:
     """Retrieve a specific non-resource role assigned to the user."""
     with db.cursor(conn) as cursor:
         cursor.execute(
-            "SELECT r.*, p.* FROM user_roles AS ur INNER JOIN roles AS r "
+            "SELECT res.resource_id, ur.user_id, r.*, p.* "
+            "FROM resources AS res INNER JOIN user_roles AS ur "
+            "ON res.resource_id=ur.resource_id INNER JOIN roles AS r "
             "ON ur.role_id=r.role_id INNER JOIN role_privileges AS rp "
             "ON r.role_id=rp.role_id INNER JOIN privileges AS p "
             "ON rp.privilege_id=p.privilege_id "
@@ -124,8 +126,10 @@ def user_role(conn: db.DbConnection, user: User, role_id: UUID) -> Either:
 
         results = cursor.fetchall()
         if results:
-            return Right(tuple(
-                reduce(__organise_privileges__, results, {}).values())[0])
+            res_role_obj = tuple(reduce(__organise_privileges__, results, {}).values())[0]
+            resource_id = res_role_obj["resource_id"]
+            role = tuple(res_role_obj["roles"].values())[0]
+            return Right((role, resource_id))
         return Left(NotFoundError(
             f"Could not find role with id '{role_id}'",))
 
