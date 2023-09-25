@@ -18,9 +18,9 @@ from gn_auth.auth.authentication.users import User, user_by_id, user_by_email
 
 from .checks import authorised_for
 from .models import (
-    Resource, save_resource, resource_data, resource_by_id,
-    resource_categories, assign_resource_user, link_data_to_resource,
-    unassign_resource_user, resource_category_by_id, unlink_data_from_resource,
+    Resource, resource_data, resource_by_id, resource_categories,
+    assign_resource_user, link_data_to_resource, unassign_resource_user,
+    resource_category_by_id, unlink_data_from_resource,
     create_resource as _create_resource)
 from .groups.models import Group, GroupRole, resource_owner, group_role_by_id
 
@@ -253,6 +253,54 @@ def unassign_role_to_user(resource_id: uuid.UUID) -> Response:
 
         return jsonify(with_db_connection(__assign__))
 
+def __public_view_params__(cursor, user_id, resource_id):
+    ignore = (str(user_id),)
+    # sys admins
+    cursor.execute(
+        "SELECT ur.user_id FROM user_roles AS ur INNER JOIN roles AS r "
+        "ON ur.role_id=r.role_id WHERE r.role_name='system-administrator'")
+    ignore = ignore + tuple(
+        row["user_id"] for row in cursor.fetchall())
+    # group admins
+    cursor.execute(
+        "SELECT DISTINCT gu.user_id FROM resource_ownership AS ro "
+        "INNER JOIN groups AS g ON ro.group_id=g.group_id "
+        "INNER JOIN group_users AS gu ON g.group_id=gu.group_id "
+        "INNER JOIN user_roles AS ur ON gu.user_id=ur.user_id "
+        "INNER JOIN roles AS r ON ur.role_id=r.role_id "
+        "WHERE ro.resource_id=? AND r.role_name='group-leader'",
+        (str(resource_id),))
+    ignore = tuple(set(
+        ignore + tuple(row["user_id"] for row in cursor.fetchall())))
+
+    cursor.execute(
+        "SELECT user_id FROM users WHERE user_id NOT IN "
+        f"({', '.join(['?'] * len(ignore))})",
+        ignore)
+    user_ids = tuple(row["user_id"] for row in cursor.fetchall())
+    cursor.execute(
+        "SELECT role_id FROM roles WHERE role_name='public-view'")
+    role_id = cursor.fetchone()["role_id"]
+    return tuple({
+        "user_id": user_id,
+        "role_id": role_id,
+        "resource_id": str(resource_id)
+    } for user_id in user_ids)
+
+def __assign_revoke_public_view__(cursor, user_id, resource_id, public):
+    if public:
+        cursor.executemany(
+            "INSERT INTO user_roles(user_id, role_id, resource_id) "
+            "VALUES(:user_id, :role_id, :resource_id) "
+            "ON CONFLICT (user_id, role_id, resource_id) "
+            "DO NOTHING",
+            __public_view_params__(cursor, user_id, resource_id))
+        return
+    cursor.executemany(
+        "DELETE FROM user_roles WHERE user_id=:user_id "
+        "AND role_id=:role_id AND resource_id=:resource_id",
+        __public_view_params__(cursor, user_id, resource_id))
+
 @resources.route("<uuid:resource_id>/toggle-public", methods=["POST"])
 @require_oauth("profile group resource role")
 def toggle_public(resource_id: uuid.UUID) -> Response:
@@ -260,11 +308,23 @@ def toggle_public(resource_id: uuid.UUID) -> Response:
     with require_oauth.acquire("profile group resource") as the_token:
         def __toggle__(conn: db.DbConnection) -> Resource:
             old_rsc = resource_by_id(conn, the_token.user, resource_id)
-            return save_resource(
-                conn, the_token.user, Resource(
-                    old_rsc.resource_id, old_rsc.resource_name,
-                    old_rsc.resource_category, not old_rsc.public,
-                    old_rsc.resource_data))
+            public = not old_rsc.public
+            new_resource = Resource(
+                old_rsc.resource_id, old_rsc.resource_name,
+                old_rsc.resource_category, public,
+                old_rsc.resource_data)
+            with db.cursor(conn) as cursor:
+                cursor.execute(
+                    "UPDATE resources SET public=:public "
+                    "WHERE resource_id=:resource_id",
+                    {
+                        "public": 1 if public else 0,
+                        "resource_id": str(resource_id)
+                    })
+                __assign_revoke_public_view__(
+                    cursor, the_token.user.user_id, resource_id, public)
+                return new_resource
+            return new_resource
 
         resource = with_db_connection(__toggle__)
         return jsonify({

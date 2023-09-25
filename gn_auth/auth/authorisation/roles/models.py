@@ -133,18 +133,40 @@ def user_role(conn: db.DbConnection, user: User, role_id: UUID) -> Either:
         return Left(NotFoundError(
             f"Could not find role with id '{role_id}'",))
 
-def assign_default_roles(cursor: db.DbCursor, user: User):
-    """Assign `user` some default roles."""
+def __assign_group_creator_role__(cursor: db.DbCursor, user: User):
     cursor.execute(
         'SELECT role_id FROM roles WHERE role_name IN '
         '("group-creator")')
-    role_ids = cursor.fetchall()
-    str_user_id = str(user.user_id)
-    params = tuple(
-        {"user_id": str_user_id, "role_id": row["role_id"]} for row in role_ids)
+    role_id = cursor.fetchone()["role_id"]
+    cursor.execute(
+        "SELECT resource_id FROM resources AS r "
+        "INNER JOIN resource_categories AS rc "
+        "ON r.resource_category_id=rc.resource_category_id "
+        "WHERE rc.resource_category_key='system'")
+    resource_id = cursor.fetchone()["resource_id"]
+    cursor.execute(
+        ("INSERT INTO user_roles VALUES (:user_id, :role_id, :resource_id)"),
+        {"user_id": str(user.user_id), "role_id": role_id,
+         "resource_id": resource_id})
+
+def __assign_public_view_role__(cursor: db.DbCursor, user: User):
+    cursor.execute("SELECT resource_id FROM resources WHERE public=1")
+    public_resources = tuple(row["resource_id"] for row in cursor.fetchall())
+    cursor.execute("SELECT role_id FROM roles WHERE role_name='public-view'")
+    role_id = cursor.fetchone()["role_id"]
     cursor.executemany(
-        ("INSERT INTO user_roles VALUES (:user_id, :role_id)"),
-        params)
+        "INSERT INTO user_roles(user_id, role_id, resource_id "
+        "VALUES(:user_id, :role_id, :resource_id)",
+        tuple({
+            "user_id": str(user.user_id),
+            "role_id": role_id,
+            "resource_id": resource_id
+        } for resource_id in public_resources))
+
+def assign_default_roles(cursor: db.DbCursor, user: User):
+    """Assign `user` some default roles."""
+    __assign_group_creator_role__(cursor, user)
+    __assign_public_view_role__(cursor, user)
 
 def revoke_user_role_by_name(cursor: db.DbCursor, user: User, role_name: str):
     """Revoke a role from `user` by the role's name"""
