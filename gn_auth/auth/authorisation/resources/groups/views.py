@@ -233,6 +233,9 @@ def unlinked_phenotype_data(
 @require_oauth("profile group resource")
 def unlinked_data(resource_type: str) -> Response:
     """View data linked to the group but not linked to any resource."""
+    if resource_type in ("system", "group"):
+        return jsonify(tuple())
+
     if resource_type not in ("all", "mrna", "genotype", "phenotype"):
         raise AuthorisationError(f"Invalid resource type {resource_type}")
 
