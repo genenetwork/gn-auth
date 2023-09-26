@@ -24,14 +24,12 @@ def authorised_for(conn: db.DbConnection, user: User, privileges: tuple[str],
     """
     with db.cursor(conn) as cursor:
         cursor.execute(
-            ("SELECT guror.*, rp.privilege_id FROM "
-             "group_user_roles_on_resources AS guror "
-             "INNER JOIN group_roles AS gr ON  "
-             "(guror.group_id=gr.group_id AND guror.role_id=gr.role_id) "
-             "INNER JOIN roles AS r ON gr.role_id=r.role_id "
+            ("SELECT ur.*, rp.privilege_id FROM "
+             "user_roles AS ur "
+             "INNER JOIN roles AS r ON ur.role_id=r.role_id "
              "INNER JOIN role_privileges AS rp ON r.role_id=rp.role_id "
-             "WHERE guror.user_id=? "
-             f"AND guror.resource_id IN ({', '.join(['?']*len(resource_ids))})"
+             "WHERE ur.user_id=? "
+             f"AND ur.resource_id IN ({', '.join(['?']*len(resource_ids))})"
              f"AND rp.privilege_id IN ({', '.join(['?']*len(privileges))})"),
             ((str(user.user_id),) + tuple(
                 str(r_id) for r_id in resource_ids) + tuple(privileges)))
