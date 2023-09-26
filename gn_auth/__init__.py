@@ -12,6 +12,7 @@ from gn_auth.auth.views import oauth2
 from gn_auth.auth.authentication.oauth2.server import setup_oauth2_server
 
 from . import settings
+from .errors import register_error_handlers
 
 class ConfigurationError(Exception):
     """Raised in case of a configuration error."""
@@ -73,5 +74,7 @@ def create_app(config: Optional[dict] = None) -> Flask:
     ## Blueprints
     app.register_blueprint(misc, url_prefix="/")
     app.register_blueprint(oauth2, url_prefix="/auth")
+
+    register_error_handlers(app)
 
     return app
