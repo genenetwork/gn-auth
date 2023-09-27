@@ -16,7 +16,9 @@ def __organise_privileges_by_resource_id__(rows):
         }
     return reduce(__organise__, rows, {})
 
-def authorised_for(conn: db.DbConnection, user: User, privileges: tuple[str],
+def authorised_for(conn: db.DbConnection,
+                   user: User,
+                   privileges: tuple[str, ...],
                    resource_ids: Sequence[UUID]) -> dict[UUID, bool]:
     """
     Check whether `user` is authorised to access `resources` according to given

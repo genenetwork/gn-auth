@@ -324,8 +324,12 @@ def group_privileges():
                 group_level_roles = tuple(
                     Privilege(row["privilege_id"], row["privilege_description"])
                     for row in cursor.fetchall())
-            return tuple(privilege for arole in this_user_roles
-                         for privilege in arole.privileges) + group_level_roles
+
+            ## the `user_roles(...)` function changed thus this entire function
+            ## needs to change or be obsoleted -- also remove the ignore below
+            return tuple(
+                privilege for arole in this_user_roles
+                for privilege in arole.privileges) + group_level_roles #type: ignore[attr-defined]
         return jsonify(tuple(
             dictify(priv) for priv in with_db_connection(__list_privileges__)))
 

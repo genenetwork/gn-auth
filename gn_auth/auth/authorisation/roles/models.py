@@ -105,7 +105,7 @@ def user_roles(conn: db.DbConnection, user: User) -> Sequence[dict]:
             "WHERE ur.user_id=?",
             (str(user.user_id),))
 
-        return tuple({
+        return tuple({# type: ignore[var-annotated]
             **row, "roles": tuple(row["roles"].values())
         } for row in reduce(
             __organise_privileges__, cursor.fetchall(), {}).values())
@@ -126,7 +126,8 @@ def user_role(conn: db.DbConnection, user: User, role_id: UUID) -> Either:
 
         results = cursor.fetchall()
         if results:
-            res_role_obj = tuple(reduce(__organise_privileges__, results, {}).values())[0]
+            res_role_obj = tuple(# type: ignore[var-annotated]
+                reduce(__organise_privileges__, results, {}).values())[0]
             resource_id = res_role_obj["resource_id"]
             role = tuple(res_role_obj["roles"].values())[0]
             return Right((role, resource_id))

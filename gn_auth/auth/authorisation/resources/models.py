@@ -188,7 +188,7 @@ def resource_data(conn, resource, offset: int = 0, limit: Optional[int] = None) 
     with db.cursor(conn) as cursor:
         return tuple(
             dict(data_row) for data_row in
-            resource_data_function[
+            resource_data_function[# type: ignore[operator]
                 resource.resource_category.resource_category_key](
                     cursor, resource.resource_id, offset, limit))
 
