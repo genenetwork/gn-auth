@@ -48,7 +48,7 @@
 	      (when tests?
 		(invoke "pytest" "-k" "unit_test")))))))
     (native-inputs
-     `(("python-mypy" ,python-mypy-0.981)
+     `(("python-mypy" ,python-mypy)
        ("python-pytest" ,python-pytest)
        ("python-pylint" ,python-pylint)
        ("python-hypothesis" ,python-hypothesis)
