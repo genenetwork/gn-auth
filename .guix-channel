@@ -4,7 +4,7 @@
  (dependencies
   (channel
    (name guix-bioinformatics)
-   (url "https://gitlab.com/genenetwork/guix-bioinformatics.git")
+   (url "https://git.genenetwork.org/guix-bioinformatics")
    (branch "master"))
   ;; FIXME: guix-bioinformatics depends on guix-past. So, there
   ;; should be no reason to explicitly depend on guix-past. But, the
