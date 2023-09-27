@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 """Setup script for GeneNetwork Auth package."""
+import glob
 from setuptools import setup
 from setup_commands import RunTests
 
@@ -7,6 +8,14 @@ LONG_DESCRIPTION = """
 gn-auth project is the authentication/authorisation server to be used
 across all GeneNetwork services.
 """
+
+def get_packages(dir_path):
+    "get package relative to name of directory"
+    dir_name = Path(dir_path).absolute().name
+    return list(".".join(path) for path in
+                (path[0:-1] for path in
+                 (path.split("/") for path in
+                  glob.glob(f"{dir_name}/**/__init__.py", recursive=True))))
 
 setup(author="Frederick M. Muriithi",
       author_email="fredmanglis@gmail.com",
@@ -32,7 +41,7 @@ setup(author="Frederick M. Muriithi",
       long_description=LONG_DESCRIPTION,
       long_description_content_type="text/markdown",
       name="gn-auth",
-      packages = ["gn_auth"],
+      packages = get_packages("./gn_auth"),
       url="https://github.com/genenetwork/gn-auth",
       version="0.0.1",
       tests_require=["pytest", "hypothesis"],
