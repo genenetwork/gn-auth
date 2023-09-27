@@ -4,7 +4,7 @@ from setuptools import setup
 from setup_commands import RunTests
 
 LONG_DESCRIPTION = """
-GeneNetwork-Auth project is the authentication/authorisation server to be used
+gn-auth project is the authentication/authorisation server to be used
 across all GeneNetwork services.
 """
 
@@ -26,14 +26,15 @@ setup(author="Frederick M. Muriithi",
           "flask-cors==3.0.9"
           "xapian-bindings"
       ],
+      include_package_data=True,
       scripts=[],
       license="AGPLV3",
       long_description=LONG_DESCRIPTION,
       long_description_content_type="text/markdown",
-      name="GeneNetwork-Auth",
-      package_dir = {'': "gn_auth"},
+      name="gn-auth",
+      packages = ["gn_auth"],
       url="https://github.com/genenetwork/gn-auth",
-      version="0.0.0",
+      version="0.0.1",
       tests_require=["pytest", "hypothesis"],
       cmdclass={
           "run_tests": RunTests ## testing
