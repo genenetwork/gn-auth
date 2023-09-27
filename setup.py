@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """Setup script for GeneNetwork Auth package."""
 import glob
+from pathlib import Path
 from setuptools import setup
 from setup_commands import RunTests
 
