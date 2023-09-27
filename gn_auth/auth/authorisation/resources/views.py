@@ -163,11 +163,9 @@ def resource_users(resource_id: uuid.UUID):
                         user_id = uuid.UUID(row["user_id"])
                         user = users_n_roles.get(user_id, {}).get(
                             "user", User(user_id, row["email"], row["name"]))
-                        role = GroupRole(
-                            uuid.UUID(row["group_role_id"]),
-                            resource_owner(conn, resource),
-                            Role(uuid.UUID(row["role_id"]), row["role_name"],
-                                 bool(int(row["user_editable"])), tuple()))
+                        role = Role(
+                            uuid.UUID(row["role_id"]), row["role_name"],
+                            bool(int(row["user_editable"])), tuple())
                         return {
                             **users_n_roles,
                             user_id: {
@@ -180,15 +178,13 @@ def resource_users(resource_id: uuid.UUID):
                             }
                         }
                     cursor.execute(
-                        "SELECT g.*, u.*, r.*, gr.group_role_id "
-                        "FROM groups AS g INNER JOIN "
-                        "group_users AS gu ON g.group_id=gu.group_id "
-                        "INNER JOIN users AS u ON gu.user_id=u.user_id "
-                        "INNER JOIN group_user_roles_on_resources AS guror "
-                        "ON u.user_id=guror.user_id INNER JOIN roles AS r "
-                        "ON guror.role_id=r.role_id "
-                        "INNER JOIN group_roles AS gr ON r.role_id=gr.role_id "
-                        "WHERE guror.resource_id=?",
+                        "SELECT g.*, u.*, r.* "
+                        "FROM groups AS g INNER JOIN group_users AS gu "
+                        "ON g.group_id=gu.group_id INNER JOIN users AS u "
+                        "ON gu.user_id=u.user_id INNER JOIN user_roles AS ur "
+                        "ON u.user_id=ur.user_id INNER JOIN roles AS r "
+                        "ON ur.role_id=r.role_id "
+                        "WHERE ur.resource_id=?",
                         (str(resource_id),))
                     return reduce(__organise_users_n_roles__, cursor.fetchall(), {})
             raise AuthorisationError(

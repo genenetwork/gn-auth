@@ -182,7 +182,8 @@ def resource_data(conn, resource, offset: int = 0, limit: Optional[int] = None) 
         "mrna": mrna_resource_data,
         "genotype": genotype_resource_data,
         "phenotype": phenotype_resource_data,
-        "system": lambda *args: tuple()
+        "system": lambda *args: tuple(),
+        "group": lambda *args: tuple()
     }
     with db.cursor(conn) as cursor:
         return tuple(
