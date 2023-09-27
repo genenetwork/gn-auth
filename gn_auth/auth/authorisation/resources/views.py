@@ -22,7 +22,7 @@ from .models import (
     assign_resource_user, link_data_to_resource, unassign_resource_user,
     resource_category_by_id, unlink_data_from_resource,
     create_resource as _create_resource)
-from .groups.models import Group, GroupRole, resource_owner, group_role_by_id
+from .groups.models import Group, resource_owner, group_role_by_id
 
 resources = Blueprint("resources", __name__)
 
@@ -153,9 +153,9 @@ def resource_users(resource_id: uuid.UUID):
     """Retrieve all users with access to the given resource."""
     with require_oauth.acquire("profile group resource") as the_token:
         def __the_users__(conn: db.DbConnection):
-            resource = resource_by_id(conn, the_token.user, resource_id)
             authorised = authorised_for(
-                conn, the_token.user, ("group:resource:edit-resource",),
+                conn, the_token.user,
+                ("group:resource:edit-resource","group:resource:view-resource"),
                 (resource_id,))
             if authorised.get(resource_id, False):
                 with db.cursor(conn) as cursor:
