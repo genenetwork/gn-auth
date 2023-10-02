@@ -22,7 +22,21 @@ test_params = (
       ("a0e67630-d502-4b9f-b23f-6805d0f30e30",
        "5103cc68-96f8-4ebb-83a4-a31692402c9b"),
       ("a0e67630-d502-4b9f-b23f-6805d0f30e30",
-       "1c59eff5-9336-4ed2-a166-8f70d4cb012e"))),)
+       "1c59eff5-9336-4ed2-a166-8f70d4cb012e"))),
+    ("20231002_01_tzxTf-link-inbredsets-to-auth-system.py",
+     "SELECT privilege_id FROM privileges WHERE privilege_id IN (?, ?, ?, ?, ?, ?)",
+     ("system:inbredset:create-case-attribute",
+      "system:inbredset:delete-case-attribute",
+      "system:inbredset:edit-case-attribute",
+      "system:inbredset:view-case-attribute",
+      "system:inbredset:apply-case-attribute-edit",
+      "system:inbredset:reject-case-attribute-edit"),
+     (("system:inbredset:create-case-attribute",),
+      ("system:inbredset:delete-case-attribute",),
+      ("system:inbredset:edit-case-attribute",),
+      ("system:inbredset:view-case-attribute",),
+      ("system:inbredset:apply-case-attribute-edit",),
+      ("system:inbredset:reject-case-attribute-edit",))))
 
 @pytest.mark.unit_test
 @pytest.mark.parametrize("migration_file,query,query_params,data", test_params)

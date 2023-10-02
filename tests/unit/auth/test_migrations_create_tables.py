@@ -43,7 +43,11 @@ migrations_and_tables = (
     ("20230907_01_pjnxz-refactor-add-resource-ownership-table.py",
      "resource_ownership"),
     ("20230907_04_3LnrG-refactor-create-group-resources-table.py",
-     "group_resources"))
+     "group_resources"),
+    ("20231002_01_tzxTf-link-inbredsets-to-auth-system.py",
+     "linked_inbredset_groups"),
+    ("20231002_01_tzxTf-link-inbredsets-to-auth-system.py",
+     "inbredset_group_resources"))
 
 @pytest.mark.unit_test
 @pytest.mark.parametrize("migration_file,the_table", migrations_and_tables)
@@ -64,6 +68,7 @@ def test_create_table(
         apply_single_migration(backend, get_migration(migration_path))
         cursor.execute("SELECT name FROM sqlite_schema WHERE type='table'")
         result_after_migration = cursor.fetchall()
+        rollback_single_migration(backend, get_migration(migration_path))
 
     rollback_migrations(backend, older_migrations)
     assert the_table not in [row[0] for row in result_before_migration]
