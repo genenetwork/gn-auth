@@ -4,6 +4,7 @@ import json
 import sqlite3
 from functools import reduce
 
+from authlib.integrations.flask_oauth2.errors import _HTTPException
 from flask import request, jsonify, Response, Blueprint, current_app as app
 
 from gn_auth.auth.db import sqlite3 as db
@@ -18,10 +19,10 @@ from gn_auth.auth.authentication.users import User, user_by_id, user_by_email
 
 from .checks import authorised_for
 from .models import (
-    Resource, resource_data, resource_by_id, resource_categories,
-    assign_resource_user, link_data_to_resource, unassign_resource_user,
-    resource_category_by_id, unlink_data_from_resource,
-    create_resource as _create_resource)
+    Resource, resource_data, resource_by_id, public_resources,
+    resource_categories, assign_resource_user, link_data_to_resource,
+    unassign_resource_user, resource_category_by_id, user_roles_on_resources,
+    unlink_data_from_resource, create_resource as _create_resource)
 from .groups.models import Group, resource_owner, group_role_by_id
 
 resources = Blueprint("resources", __name__)
@@ -328,3 +329,42 @@ def toggle_public(resource_id: uuid.UUID) -> Response:
             "description": (
                 "Made resource public" if resource.public
                 else "Made resource private")})
+
+@resources.route("/authorisation", methods=["POST"])
+def resources_authorisation():
+    """Get user authorisations for given resource(s):"""
+    try:
+        data = request.json
+        assert (data and "resource-ids" in data)
+        resource_ids = tuple(uuid.UUID(resid) for resid in data["resource-ids"])
+        pubres = tuple(
+            res.resource_id for res in with_db_connection(public_resources)
+            if res.resource_id in resource_ids)
+        with require_oauth.acquire("profile resource") as the_token:
+            resources = with_db_connection(lambda conn: user_roles_on_resources(
+                conn, the_token.user, resource_ids))
+            resp = jsonify({
+                str(resid): {
+                    "public-read": resid in pubres,
+                    "roles": tuple(
+                        dictify(rol) for rol in
+                        resources.get(resid, {}).get("roles", tuple()))
+                } for resid in resource_ids
+            })
+    except _HTTPException as _httpe:
+        err_msg = json.loads(_httpe.body)
+        if err_msg["error"] == "missing_authorization":
+            resp = jsonify({
+                str(resid): {
+                    "public-read": resid in pubres
+                } for resid in resource_ids
+            })
+    except AssertionError as _aerr:
+        resp = jsonify({
+            "status": "bad-request",
+            "error_description": (
+                "Expected a JSON object with a 'resource-ids' key.")
+        })
+        resp.status_code = 400
+
+    return resp
