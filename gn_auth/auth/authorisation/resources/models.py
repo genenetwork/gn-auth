@@ -291,7 +291,8 @@ def attach_resources_data(
         "genotype": genotype_attach_resources_data,
         "phenotype": phenotype_attach_resources_data,
         "system": lambda *args: [],
-        "group": lambda *args: []
+        "group": lambda *args: [],
+        "inbredset-group": lambda *args: []
     }
     organised = organise_resources_by_category(resources)
     with db.cursor(conn) as cursor:

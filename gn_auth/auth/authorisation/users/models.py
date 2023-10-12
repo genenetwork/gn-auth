@@ -52,15 +52,15 @@ def user_resource_roles(conn: db.DbConnection, user: User) -> dict[uuid.UUID, tu
         cursor.execute(
             "SELECT res.*, rls.*, p.*"
             "FROM resources AS res INNER JOIN "
-            "group_user_roles_on_resources AS guror "
-            "ON res.resource_id=guror.resource_id "
+            "user_roles AS ur "
+            "ON res.resource_id=ur.resource_id "
             "LEFT JOIN roles AS rls "
-            "ON guror.role_id=rls.role_id "
+            "ON ur.role_id=rls.role_id "
             "LEFT JOIN role_privileges AS rp "
             "ON rls.role_id=rp.role_id "
             "LEFT JOIN privileges AS p "
             "ON rp.privilege_id=p.privilege_id "
-            "WHERE guror.user_id = ?",
+            "WHERE ur.user_id = ?",
             (str(user.user_id),))
         return __build_resource_roles__(
             (dict(row) for row in cursor.fetchall()))
