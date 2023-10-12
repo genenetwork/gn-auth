@@ -1,6 +1,7 @@
 """
 Link any unlinked InbredSet groups.
 """
+import sys
 import uuid
 from pathlib import Path
 
@@ -73,14 +74,27 @@ def build_resources(conn, new_linked):
 def own_resources(conn, group, resources):
     """Link new resources to admin group."""
     with authdb.cursor(conn) as cursor:
+        params = tuple({
+            "group_id": str(group.group_id),
+            **resource
+        } for resource in resources)
         cursor.executemany(
             "INSERT INTO resource_ownership VALUES "
             "(:group_id, :resource_id)",
-            tuple({
-                "group_id": str(group.group_id),
-                **resource
-            } for resource in resources))
-        return resources
+            params)
+        return params
+
+def assign_role_for_admin(conn, user, resources):
+    """Assign basic role to admin on the inbredset-group resources."""
+    with authdb.cursor(conn) as cursor:
+        cursor.execute(
+            "SELECT * FROM roles WHERE role_name='inbredset-group-owner'")
+        role_id = cursor.fetchone()["role_id"]
+        cursor.executemany(
+            "INSERT INTO user_roles(user_id, role_id, resource_id) "
+            "VALUES (:user_id, :role_id, :resource_id)",
+            tuple({**rsc, "user_id": str(user.user_id), "role_id": role_id}
+                  for rsc in resources))
 
 @click.command()
 @click.argument("authdbpath") # "Path to the Auth(entic|oris)ation database"
@@ -96,13 +110,13 @@ def run(authdbpath, mysqldburi):
     with (authdb.connection(authdbpath) as authconn,
           biodb.database_connection(mysqldburi) as bioconn):
         admin = select_sys_admin(sys_admins(authconn))
-        unlinked = own_resources(
+        unlinked = assign_role_for_admin(authconn, admin, own_resources(
             authconn,
             admin_group(authconn, admin),
             build_resources(
-            authconn, link_unlinked(
-                authconn,
-                unlinked_inbredsets(bioconn, linked_inbredsets(authconn)))))
+                authconn, link_unlinked(
+                    authconn,
+                    unlinked_inbredsets(bioconn, linked_inbredsets(authconn))))))
 
 if __name__ == "__main__":
     run() # pylint: disable=[no-value-for-parameter]
