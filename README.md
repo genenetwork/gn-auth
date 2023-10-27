@@ -35,7 +35,7 @@ variable of the same name as the variable you wish to override.
 | `SQL_URI` | MariaDB connections | Used to connect to the MariaDB server |
 | `AUTH_DB` | SQLite connections | Used to connect to the Authentication/Authorisation database |
 | `AUTH_MIGRATIONS` | Migrations | Relative (to the repo root) path to the migration scripts for the auth(entic/oris)ation database |
-| `OAUTH2_SCOPE` | Supported OAuth2 scope for the application. |
+| `OAUTH2_SCOPE` | Supported OAuth2 scope for the application. | This has some default values provided in the file `gn_auth/settings.py` in this repository. You could narrow the allowable scopes by overriding these. |
 
 There are a few other variables we can set, if we want to customise, or troubleshoot token generation. These are:
 
