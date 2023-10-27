@@ -20,7 +20,6 @@
   #:use-module (gnu packages databases)
 
   ;; Packages from guix-bioinformatics
-  #:use-module (gn packages python)
   #:use-module (gn packages python-web))
 
 (define %source-dir (dirname (dirname (current-source-directory))))
@@ -60,7 +59,7 @@
        ("python-redis" ,python-redis)
        ("python-authlib" ,python-authlib)
        ("python-pymonad" ,python-pymonad)
-       ("yoyo-migrations" ,yoyo-migrations-8.2.0)
+       ("yoyo-migrations" ,yoyo-migrations)
        ("python-bcrypt" ,python-bcrypt) ;; remove after removing all references
        ("python-mysqlclient" ,python-mysqlclient)
        ("python-argon2-cffi" ,python-argon2-cffi)
