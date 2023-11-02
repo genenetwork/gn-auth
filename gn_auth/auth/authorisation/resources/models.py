@@ -298,7 +298,7 @@ def attach_resources_data(
     with db.cursor(conn) as cursor:
         return tuple(
             resource for categories in
-            (resource_data_function[category.resource_category_key](
+            (resource_data_function[category.resource_category_key](# type: ignore[operator]
                 cursor, rscs)
              for category, rscs in organised.items())
             for resource in categories)
@@ -377,7 +377,7 @@ def save_resource(
 
 def user_roles_on_resources(conn: db.DbConnection,
                             user: User,
-                            resource_ids: tuple[UUID] = tuple()) -> dict:
+                            resource_ids: tuple[UUID, ...] = tuple()) -> dict:
     """Get roles on resources for a particular user."""
     def __setup_roles__(old_roles, row):
         roles = {role.role_id: role for role in old_roles}
@@ -409,7 +409,7 @@ def user_roles_on_resources(conn: db.DbConnection,
         "INNER JOIN role_privileges AS rp ON r.role_id=rp.role_id "
         "INNER JOIN privileges AS p ON rp.privilege_id=p.privilege_id "
         "WHERE ur.user_id=?")
-    params = (str(user.user_id),)
+    params: tuple[str, ...] = (str(user.user_id),)
 
     if len(resource_ids) > 0:
         pholders = ", ".join(["?"] * len(resource_ids))
