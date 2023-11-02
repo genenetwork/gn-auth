@@ -53,7 +53,10 @@ def setup_logging_handlers(app: Flask) -> None:
 
 def create_app(config: Optional[dict] = None) -> Flask:
     """Create and return a new flask application."""
-    app = Flask(__name__)
+    app_instance_path = os.environ.get("GN_AUTH_INSTANCE_PATH")
+    app = Flask(__name__,
+                instance_path=app_instance_path,
+                instance_relative_config=True)
 
     # ====== Setup configuration ======
     app.config.from_object(settings) # Default settings
@@ -64,6 +67,8 @@ def create_app(config: Optional[dict] = None) -> Flask:
         app.config.from_envvar("GN_AUTH_CONF")
 
     override_settings_with_envvars(app)
+    if bool(app_instance_path):## load secrets
+        app.config.from_pyfile("secrets.py")
     # ====== END: Setup configuration ======
 
     check_mandatory_settings(app)
