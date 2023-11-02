@@ -110,7 +110,7 @@ def run(authdbpath, mysqldburi):
     with (authdb.connection(authdbpath) as authconn,
           biodb.database_connection(mysqldburi) as bioconn):
         admin = select_sys_admin(sys_admins(authconn))
-        unlinked = assign_role_for_admin(authconn, admin, own_resources(
+        assign_role_for_admin(authconn, admin, own_resources(
             authconn,
             admin_group(authconn, admin),
             build_resources(

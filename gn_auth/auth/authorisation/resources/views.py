@@ -341,14 +341,14 @@ def resources_authorisation():
             res.resource_id for res in with_db_connection(public_resources)
             if res.resource_id in resource_ids)
         with require_oauth.acquire("profile resource") as the_token:
-            resources = with_db_connection(lambda conn: user_roles_on_resources(
+            the_resources = with_db_connection(lambda conn: user_roles_on_resources(
                 conn, the_token.user, resource_ids))
             resp = jsonify({
                 str(resid): {
                     "public-read": resid in pubres,
                     "roles": tuple(
                         dictify(rol) for rol in
-                        resources.get(resid, {}).get("roles", tuple()))
+                        the_resources.get(resid, {}).get("roles", tuple()))
                 } for resid in resource_ids
             })
     except _HTTPException as _httpe:

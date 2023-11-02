@@ -3,7 +3,6 @@ from flask import jsonify, Response, Blueprint
 
 from gn_auth.auth.db import sqlite3 as db
 from gn_auth.auth.db.sqlite3 import with_db_connection
-from gn_auth.auth.authentication.oauth2.resource_server import require_oauth
 
 iset = Blueprint("inbredset", __name__)
 
