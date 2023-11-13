@@ -156,7 +156,7 @@ def __assign_public_view_role__(cursor: db.DbCursor, user: User):
     cursor.execute("SELECT role_id FROM roles WHERE role_name='public-view'")
     role_id = cursor.fetchone()["role_id"]
     cursor.executemany(
-        "INSERT INTO user_roles(user_id, role_id, resource_id "
+        "INSERT INTO user_roles(user_id, role_id, resource_id) "
         "VALUES(:user_id, :role_id, :resource_id)",
         tuple({
             "user_id": str(user.user_id),
