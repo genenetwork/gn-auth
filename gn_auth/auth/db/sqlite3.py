@@ -48,12 +48,12 @@ def cursor(conn: DbConnection) -> Iterator[DbCursor]:
     cur = conn.cursor()
     try:
         yield cur
+        conn.commit()
     except sqlite3.Error as exc:
         conn.rollback()
         logging.debug(traceback.format_exc())
         raise exc
     finally:
-        conn.commit()
         cur.close()
 
 def with_db_connection(func: Callable[[DbConnection], Any]) -> Any:
