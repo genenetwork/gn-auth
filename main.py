@@ -14,7 +14,10 @@ from gn_auth import migrations
 from gn_auth import create_app
 
 from gn_auth.auth.db import sqlite3 as db
-from gn_auth.auth.authentication.users import hash_password
+from gn_auth.auth.authentication.users import user_by_id, hash_password
+
+from gn_auth.auth.authorisation.errors import NotFoundError
+from gn_auth.auth.authorisation.users.admin.models import make_sys_admin
 
 from scripts import register_sys_admin as rsysadm# type: ignore[import]
 from scripts import migrate_existing_data as med# type: ignore[import]
@@ -96,20 +99,13 @@ def init_dev_clients():
 @click.argument("user_id", type=click.UUID)
 def assign_system_admin(user_id: uuid.UUID):
     """Assign user with ID `user_id` administrator role."""
-    dburi = app.config["AUTH_DB"]
-    with db.connection(dburi) as conn, db.cursor(conn) as cursor:
-        cursor.execute("SELECT * FROM users WHERE user_id=?",
-                       (str(user_id),))
-        row = cursor.fetchone()
-        if row:
-            cursor.execute(
-                "SELECT * FROM roles WHERE role_name='system-administrator'")
-            admin_role = cursor.fetchone()
-            cursor.execute("INSERT INTO user_roles VALUES (?,?)",
-                           (str(user_id), admin_role["role_id"]))
+    try:
+        dburi = app.config["AUTH_DB"]
+        with db.connection(dburi) as conn, db.cursor(conn) as cursor:
+            make_sys_admin(cursor, user_by_id(conn, user_id))
             return 0
-        print(f"ERROR: Could not find user with ID {user_id}",
-              file=sys.stderr)
+    except NotFoundError as nfe:
+        print(nfe, file=sys.stderr)
         sys.exit(1)
 
 @app.cli.command()
