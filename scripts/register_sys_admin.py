@@ -1,6 +1,5 @@
 """Script to register and mark a user account as sysadmin."""
 import sys
-import uuid
 import getpass
 from pathlib import Path
 
@@ -8,7 +7,8 @@ import click
 from email_validator import validate_email, EmailNotValidError
 
 from gn_auth.auth.db import sqlite3 as db
-from gn_auth.auth.authentication.users import hash_password
+from gn_auth.auth.authorisation.users.admin.models import make_sys_admin
+from gn_auth.auth.authentication.users import save_user, set_user_password
 
 def fetch_email() -> str:
     """Prompt user for email."""
@@ -46,34 +46,10 @@ def fetch_name() -> str:
 
 def save_admin(conn: db.DbConnection, name: str, email: str, passwd: str):
     """Save the details to the database and assign the new user as admin."""
-    admin_id = uuid.uuid4()
-    admin = {
-        "user_id": str(admin_id),
-        "email": email,
-        "name": name,
-        "hash": hash_password(passwd)
-    }
     with db.cursor(conn) as cursor:
-        cursor.execute("INSERT INTO users VALUES (:user_id, :email, :name)",
-                       admin)
-        cursor.execute("INSERT INTO user_credentials VALUES (:user_id, :hash)",
-                       admin)
-        cursor.execute(
-            "SELECT * FROM roles WHERE role_name='system-administrator'")
-        admin_role = cursor.fetchone()
-        cursor.execute(
-            "SELECT * FROM resources AS r "
-            "INNER JOIN resource_categories AS rc "
-            "ON r.resource_category_id=rc.resource_category_id "
-            "WHERE resource_category_key='system'")
-        the_system = cursor.fetchall()
-        cursor.execute(
-            "INSERT INTO user_roles VALUES (:user_id, :role_id, :resource_id)",
-            {
-                **admin,
-                "role_id": admin_role["role_id"],
-                "resource_id": the_system["resource_id"]
-            })
+        usr, _hpasswd = set_user_password(
+            cursor, save_user(cursor, email, name), passwd)
+        make_sys_admin(cursor, usr)
         return 0
 
 def register_admin(authdbpath: Path):
