@@ -54,13 +54,14 @@ def __assign_resource_owner_role__(cursor, resource, user, group):
              "role_id": role["role_id"]})
 
     cursor.execute(
-            "INSERT INTO user_roles "
-            "VALUES (:user_id, :role_id, :resource_id)",
-            {
-                "user_id": str(user.user_id),
-                "role_id": role["role_id"],
-                "resource_id": str(resource.resource_id)
-            })
+        "INSERT INTO user_roles "
+        "VALUES (:user_id, :role_id, :resource_id) "
+        "ON CONFLICT (user_id, role_id, resource_id) DO NOTHING",
+        {
+            "user_id": str(user.user_id),
+            "role_id": role["role_id"],
+            "resource_id": str(resource.resource_id)
+        })
 
 @authorised_p(("group:resource:create-resource",),
               error_description="Insufficient privileges to create a resource",

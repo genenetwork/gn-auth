@@ -451,3 +451,16 @@ def resource_owner(conn: db.DbConnection, resource: Resource) -> Group:
                 json.loads(row["group_metadata"]))
 
     raise MissingGroupError("Resource has no 'owning' group.")
+
+def add_resources_to_group(conn: db.DbConnection,
+                           resources: tuple[Resource, ...],
+                           group: Group):
+    """Link the resources to the admin group."""
+    with db.cursor(conn) as cursor:
+        cursor.executemany(
+            "INSERT INTO resource_ownership VALUES(:group_id, :resource_id) "
+            "ON CONFLICT (group_id, resource_id) DO NOTHING",
+            tuple({
+                "group_id": str(group.group_id),
+                "resource_id": str(rsc.resource_id)
+            } for rsc in resources))

@@ -19,7 +19,8 @@ from gn_auth.auth.authentication.users import User
 from gn_auth.auth.authorisation.roles.models import (
     revoke_user_role_by_name, assign_user_role_by_name)
 
-from gn_auth.auth.authorisation.resources.groups.models import Group, save_group
+from gn_auth.auth.authorisation.resources.groups.models import (
+    Group, save_group, add_resources_to_group)
 from gn_auth.auth.authorisation.resources.models import (
     Resource, ResourceCategory, __assign_resource_owner_role__)
 
@@ -128,8 +129,7 @@ def __resource_category_by_key__(
                             row["resource_category_key"],
                             row["resource_category_description"])
 
-def __create_resources__(cursor: authdb.DbCursor, group: Group) -> tuple[
-        Resource, ...]:
+def __create_resources__(cursor: authdb.DbCursor) -> tuple[Resource, ...]:
     """Create default resources."""
     resources = tuple(Resource(
         uuid4(), name, __resource_category_by_key__(cursor, catkey),
@@ -139,20 +139,13 @@ def __create_resources__(cursor: authdb.DbCursor, group: Group) -> tuple[
         ("pheno-xboecp", "phenotype"),
         ("geno-welphd", "genotype")))
     cursor.executemany(
-        "INSERT INTO resources VALUES (:gid, :rid, :rname, :rcid, :pub)",
+        "INSERT INTO resources VALUES (:rid, :rname, :rcid, :pub)",
         tuple({
-            "gid": str(group.group_id),
             "rid": str(res.resource_id),
             "rname": res.resource_name,
             "rcid": str(res.resource_category.resource_category_id),
             "pub": 1
         } for res in resources))
-    cursor.executemany("INSERT INTO resource_ownership(group_id, resource_id) "
-                       "VALUES (:group_id, :resource_id)",
-                       tuple({
-                           "group_id": str(group.group_id),
-                           "resource_id": str(resource.resource_id)
-                       } for resource in resources))
     return resources
 
 def default_resources(conn: authdb.DbConnection, group: Group) -> tuple[
@@ -161,14 +154,16 @@ def default_resources(conn: authdb.DbConnection, group: Group) -> tuple[
     with authdb.cursor(conn) as cursor:
         cursor.execute(
             "SELECT r.resource_id, r.resource_name, r.public, rc.* "
-            "FROM resources AS r INNER JOIN resource_categories AS rc "
+            "FROM resource_ownership AS ro INNER JOIN resources AS r "
+            "ON ro.resource_id=r.resource_id "
+            "INNER JOIN resource_categories AS rc "
             "ON r.resource_category_id=rc.resource_category_id "
-            "WHERE r.group_id=? AND r.resource_name IN "
+            "WHERE ro.group_id=? AND r.resource_name IN "
             "('mRNA-euhrin', 'pheno-xboecp', 'geno-welphd')",
             (str(group.group_id),))
         rows = cursor.fetchall()
         if len(rows) == 0:
-            return __create_resources__(cursor, group)
+            return __create_resources__(cursor)
 
         return tuple(Resource(
             UUID(row["resource_id"]),
@@ -216,12 +211,12 @@ def __unassigned_mrna__(bioconn, assigned):
         cursor.execute(query, tuple(item for row in assigned for item in row))
         return (row for row in cursor.fetchall())
 
-def __assign_mrna__(authconn, bioconn, resource):
+def __assign_mrna__(authconn, bioconn, resource, group):
     "Assign any unassigned mRNA data to resource."
     while True:
         unassigned = tuple({
             "data_link_id": str(uuid4()),
-            "group_id": str(resource.group.group_id),
+            "group_id": str(group.group_id),
             "resource_id": str(resource.resource_id),
             **row
         } for row in __unassigned_mrna__(
@@ -239,7 +234,7 @@ def __assign_mrna__(authconn, bioconn, resource):
                 unassigned)
             cursor.executemany(
                 "INSERT INTO mrna_resources VALUES "
-                "(:group_id, :resource_id, :data_link_id)",
+                "(:resource_id, :data_link_id)",
                 unassigned)
             print(f"-> mRNA: Linked {len(unassigned)}")
             delay()
@@ -274,12 +269,12 @@ def __unassigned_geno__(bioconn, assigned):
         cursor.execute(query, tuple(item for row in assigned for item in row))
         return (row for row in cursor.fetchall())
 
-def __assign_geno__(authconn, bioconn, resource):
+def __assign_geno__(authconn, bioconn, resource, group):
     "Assign any unassigned Genotype data to resource."
     while True:
         unassigned = tuple({
             "data_link_id": str(uuid4()),
-            "group_id": str(resource.group.group_id),
+            "group_id": str(group.group_id),
             "resource_id": str(resource.resource_id),
             **row
         } for row in __unassigned_geno__(
@@ -297,7 +292,7 @@ def __assign_geno__(authconn, bioconn, resource):
                 unassigned)
             cursor.executemany(
                 "INSERT INTO genotype_resources VALUES "
-                "(:group_id, :resource_id, :data_link_id)",
+                "(:resource_id, :data_link_id)",
                 unassigned)
             print(f"-> Genotype: Linked {len(unassigned)}")
             delay()
@@ -338,12 +333,12 @@ def __unassigned_pheno__(bioconn, assigned):
         cursor.execute(query, tuple(item for row in assigned for item in row))
         return (row for row in cursor.fetchall())
 
-def __assign_pheno__(authconn, bioconn, resource):
+def __assign_pheno__(authconn, bioconn, resource, group):
     """Assign any unassigned Phenotype data to resource."""
     while True:
         unassigned = tuple({
             "data_link_id": str(uuid4()),
-            "group_id": str(resource.group.group_id),
+            "group_id": str(group.group_id),
             "resource_id": str(resource.resource_id),
             **row
         } for row in __unassigned_pheno__(
@@ -361,12 +356,13 @@ def __assign_pheno__(authconn, bioconn, resource):
                 unassigned)
             cursor.executemany(
                 "INSERT INTO phenotype_resources VALUES "
-                "(:group_id, :resource_id, :data_link_id)",
+                "(:resource_id, :data_link_id)",
                 unassigned)
             print(f"-> Phenotype: Linked {len(unassigned)}")
             delay()
 
-def assign_data_to_resource(authconn, bioconn, resource: Resource):
+def assign_data_to_resource(
+        authconn, bioconn, resource: Resource, group: Group):
     """Assign existing data, not linked to any group to the resource."""
     assigner_fns = {
         "mrna": __assign_mrna__,
@@ -374,7 +370,7 @@ def assign_data_to_resource(authconn, bioconn, resource: Resource):
         "phenotype": __assign_pheno__
     }
     return assigner_fns[resource.resource_category.resource_category_key](
-        authconn, bioconn, resource)
+        authconn, bioconn, resource, group)
 
 def entry(authdbpath, mysqldburi):
     """Entry-point for data migration."""
@@ -390,8 +386,10 @@ def entry(authdbpath, mysqldburi):
             the_admin_group = admin_group(authconn, admin)
             resources = default_resources(
                 authconn, the_admin_group)
+            add_resources_to_group(authconn, resources, the_admin_group)
             for resource in resources:
-                assign_data_to_resource(authconn, bioconn, resource)
+                assign_data_to_resource(
+                    authconn, bioconn, resource, the_admin_group)
                 with authdb.cursor(authconn) as cursor:
                     __assign_resource_owner_role__(
                         cursor, resource, admin, the_admin_group)
