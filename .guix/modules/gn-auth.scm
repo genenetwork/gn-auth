@@ -60,7 +60,6 @@
        ("python-authlib" ,python-authlib)
        ("python-pymonad" ,python-pymonad)
        ("yoyo-migrations" ,yoyo-migrations)
-       ("python-bcrypt" ,python-bcrypt) ;; remove after removing all references
        ("python-mysqlclient" ,python-mysqlclient)
        ("python-argon2-cffi" ,python-argon2-cffi)
        ("python-email-validator" ,python-email-validator)))
