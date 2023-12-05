@@ -9,7 +9,7 @@ from pymonad.either import Left, Right, Either
 
 from gn_auth import json_encoders_decoders as jed
 
-JOBS_NAMESPACE = "GN3_AUTH::JOBS"
+JOBS_NAMESPACE = "GN_AUTH::JOBS"
 
 class InvalidCommand(Exception):
     """Raise if the command to run is invalid."""

@@ -14,6 +14,7 @@ AUTH_MIGRATIONS = "migrations/auth"
 
 # Redis settings
 REDIS_URI = "redis://localhost:6379/0"
+REDIS_JOB_QUEUE = "GN_AUTH::job-queue"
 
 # OAuth2 settings
 OAUTH2_SCOPE = (
