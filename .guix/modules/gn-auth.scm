@@ -60,6 +60,7 @@
        ("python-authlib" ,python-authlib)
        ("python-pymonad" ,python-pymonad)
        ("yoyo-migrations" ,yoyo-migrations)
+       ("python-flask-cors" ,python-flask-cors)
        ("python-mysqlclient" ,python-mysqlclient)
        ("python-argon2-cffi" ,python-argon2-cffi)
        ("python-email-validator" ,python-email-validator)))

@@ -5,6 +5,7 @@ import logging
 from typing import Optional
 
 from flask import Flask
+from flask_cors import CORS
 
 from gn_auth.misc_views import misc
 from gn_auth.auth.views import oauth2
@@ -75,6 +76,12 @@ def create_app(config: Optional[dict] = None) -> Flask:
 
     setup_logging_handlers(app)
     setup_oauth2_server(app)
+
+    CORS(
+        app,
+        origins=app.config["CORS_ORIGINS"],
+        allow_headers=app.config["CORS_HEADERS"],
+        supports_credentials=True, intercept_exceptions=False)
 
     ## Blueprints
     app.register_blueprint(misc, url_prefix="/")

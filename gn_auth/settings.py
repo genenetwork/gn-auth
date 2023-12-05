@@ -19,3 +19,10 @@ REDIS_URI = "redis://localhost:6379/0"
 OAUTH2_SCOPE = (
     "profile", "group", "role", "resource", "user", "masquerade",
     "introspect")
+
+CORS_ORIGINS = "*"
+CORS_HEADERS = [
+    "Content-Type",
+    "Authorization",
+    "Access-Control-Allow-Credentials"
+]
