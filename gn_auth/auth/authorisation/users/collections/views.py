@@ -21,6 +21,7 @@ from .models import (
     user_collections,
     save_collections,
     create_collection,
+    REDIS_COLLECTIONS_KEY,
     delete_collections as _delete_collections)
 
 collections = Blueprint("collections", __name__)
@@ -116,7 +117,7 @@ def import_anonymous() -> Response:
             token.user,
             (user_collections(redisconn, token.user) +
              anon_colls))
-        redisconn.hdel("collections", str(anon_id))
+        redisconn.hdel(REDIS_COLLECTIONS_KEY, str(anon_id))
         return jsonify({
             "message": f"Import of {len(anon_colls)} was successful."
         })
@@ -132,7 +133,7 @@ def delete_anonymous() -> Response:
         anon_id = UUID(request.json.get("anon_id"))#type: ignore[union-attr]
         anon_colls = user_collections(redisconn, User(
             anon_id, "anon@ymous.user", "Anonymous User"))
-        redisconn.hdel("collections", str(anon_id))
+        redisconn.hdel(REDIS_COLLECTIONS_KEY, str(anon_id))
         return jsonify({
             "message": f"Deletion of {len(anon_colls)} was successful."
         })
