@@ -2,9 +2,8 @@
 
 [![GeneNetwork Auth CI
 badge](https://ci.genenetwork.org/badge/gn-auth.svg)](https://ci.genenetwork.org/jobs/gn-auth)
-[![GeneNetwork Auth pylint CI
-badge](https://ci.genenetwork.org/badge/gn-auth-pylint.svg)](https://ci.genenetwork.org/jobs/gn-auth-pylint)
-[![GeneNetwork Auth mypy CI badge](https://ci.genenetwork.org/badge/gn-auth-mypy.svg)](https://ci.genenetwork.org/jobs/gn-auth-mypy)
+[![GeneNetwork Auth all tests CI
+badge](https://ci.genenetwork.org/badge/gn-auth-all-tests.svg)](https://ci.genenetwork.org/jobs/gn-auth-all-tests)
 
 This project is for the GeneNetwork Authentication/Authorisation server to be
 used across the entire suite of the GeneNetwork services.
