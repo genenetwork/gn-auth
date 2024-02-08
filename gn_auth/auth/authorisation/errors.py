@@ -23,7 +23,6 @@ class InvalidData(AuthorisationError):
     """
     Exception if user requests invalid data
     """
-    error_code: int = 400
 
 class InconsistencyError(AuthorisationError):
     """
