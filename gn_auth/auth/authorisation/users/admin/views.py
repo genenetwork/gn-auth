@@ -18,6 +18,8 @@ from flask import (
 
 
 from gn_auth import session
+from gn_auth.auth.authorisation.errors import NotFoundError
+
 from ....db import sqlite3 as db
 from ....db.sqlite3 import with_db_connection
 
@@ -77,8 +79,10 @@ def login():
                     expires=(
                         datetime.now(tz=timezone.utc) + timedelta(minutes=10)))
                 return redirect(url_for(next_uri))
-            flash(error_message, "alert-danger")
-            return login_page
+            raise NotFoundError(error_message)
+    except NotFoundError as _nfe:
+        flash(error_message, "alert-danger")
+        return login_page
     except EmailNotValidError as _enve:
         flash(error_message, "alert-danger")
         return login_page
