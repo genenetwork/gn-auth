@@ -76,7 +76,7 @@ def list_species() -> Response:
 @data.route("/authorisation", methods=["POST"])
 @require_json
 def authorisation() -> Response:
-    """Retrive the authorisation level for datasets/traits for the user."""
+    """Retrieve the authorisation level for datasets/traits for the user."""
     # Access endpoint with something like:
     # curl -X POST http://127.0.0.1:8080/api/oauth2/data/authorisation \
     #    -H "Content-Type: application/json" \
