@@ -235,7 +235,7 @@ def __search_phenotypes__():
             "command": command
         })
 
-@data.route("/search", methods=["GET"])
+@data.route("/search", methods=["GET", "POST"])
 @require_oauth("profile group resource")
 def search_unlinked_data():
     """Search for various unlinked data."""
