@@ -18,24 +18,18 @@ from .errors import register_error_handlers
 class ConfigurationError(Exception):
     """Raised in case of a configuration error."""
 
-def __check_secret_key__(app: Flask) -> None:
-    """Verify secret key is not empty."""
-    if app.config.get("SECRET_KEY", "") == "":
-        raise ConfigurationError("The `SECRET_KEY` settings cannot be empty.")
-
 def check_mandatory_settings(app: Flask) -> None:
     """Verify that mandatory settings are defined in the application"""
     undefined = tuple(
         setting for setting in (
             "SECRET_KEY", "SQL_URI", "AUTH_DB", "AUTH_MIGRATIONS",
             "OAUTH2_SCOPE")
-        if setting not in app.config)
+        if setting not (
+                (confsetting in app.config) and bool(app.config[confsetting])))
     if len(undefined) > 0:
         raise ConfigurationError(
-            "You must provide values for the following settings: " +
+            "You must provide (valid) values for the following settings: " +
             "\t* " + "\n\t* ".join(undefined))
-
-    __check_secret_key__(app)
 
 def override_settings_with_envvars(
         app: Flask, ignore: tuple[str, ...]=tuple()) -> None:
