@@ -2,6 +2,7 @@
 import os
 import sys
 import logging
+from pathlib import Path
 from typing import Optional
 
 from flask import Flask
@@ -24,12 +25,11 @@ def check_mandatory_settings(app: Flask) -> None:
         setting for setting in (
             "SECRET_KEY", "SQL_URI", "AUTH_DB", "AUTH_MIGRATIONS",
             "OAUTH2_SCOPE")
-        if setting not (
-                (confsetting in app.config) and bool(app.config[confsetting])))
+        if not ((setting in app.config) and bool(app.config[setting])))
     if len(undefined) > 0:
         raise ConfigurationError(
             "You must provide (valid) values for the following settings: " +
-            "\t* " + "\n\t* ".join(undefined))
+            "\n\t* " + "\n\t* ".join(undefined))
 
 def override_settings_with_envvars(
         app: Flask, ignore: tuple[str, ...]=tuple()) -> None:
@@ -46,6 +46,18 @@ def setup_logging_handlers(app: Flask) -> None:
     root_logger.addHandler(stderr_handler)
     root_logger.setLevel(app.config["LOGLEVEL"])
 
+def load_secrets_conf(app: Flask) -> None:
+    """Load the secrets file."""
+    secretsfile = app.config.get("GN_AUTH_SECRETS")
+    if ((not secretsfile is None) and (bool(secretsfile.strip()))):
+        secretsfile = Path(secretsfile.strip()).absolute()
+        app.config["GN_AUTH_SECRETS"] = secretsfile
+        if not secretsfile.exists():
+            raise ConfigurationError(
+                f"The file '{secretsfile}' does not exist. "
+                "You must provide a path to an existing secrets file.")
+        app.config.from_pyfile(secretsfile)
+
 def create_app(config: Optional[dict] = None) -> Flask:
     """Create and return a new flask application."""
     app = Flask(__name__)
@@ -60,8 +72,7 @@ def create_app(config: Optional[dict] = None) -> Flask:
 
     override_settings_with_envvars(app)
 
-    if "GN_AUTH_SECRETS" in os.environ:## load secrets
-        app.config.from_envvar("GN_AUTH_SECRETS")
+    load_secrets_conf(app)
     # ====== END: Setup configuration ======
 
     check_mandatory_settings(app)

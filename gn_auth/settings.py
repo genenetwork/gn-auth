@@ -6,6 +6,7 @@ LOGLEVEL = "WARNING"
 
 # Flask settings
 SECRET_KEY = ""
+GN_AUTH_SECRETS = None # Set this to path to secrets file
 
 # Database settings
 SQL_URI = "mysql://webqtlout:webqtlout@localhost/db_webqtl"
