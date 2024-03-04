@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 """Setup script for GeneNetwork Auth package."""
-import glob
-from pathlib import Path
-from setup_commands import RunTests
 from setuptools import setup, find_packages
+from setup_commands import RunTests
 
 LONG_DESCRIPTION = """
 gn-auth project is the authentication/authorisation server to be used
@@ -46,5 +44,5 @@ setup(author="Frederick M. Muriithi",
       version="0.0.1",
       tests_require=["pytest", "hypothesis"],
       cmdclass={
-          "run_tests": RunTests ## testing
+          "run_tests": RunTests  # testing
       })
