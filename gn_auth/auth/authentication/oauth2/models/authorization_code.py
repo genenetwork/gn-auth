@@ -11,7 +11,9 @@ from .oauth2client import OAuth2Client
 
 from ...users import User, user_by_id
 
-__5_MINUTES__ = 300 # in seconds
+
+EXPIRY_IN_SECONDS = 300  # in seconds
+
 
 class AuthorisationCode(NamedTuple):
     """
@@ -39,7 +41,7 @@ class AuthorisationCode(NamedTuple):
 
     def is_expired(self):
         """Check whether the code is expired."""
-        return self.auth_time + __5_MINUTES__ < datetime.now().timestamp()
+        return self.auth_time + EXPIRY_IN_SECONDS < datetime.now().timestamp()
 
     def get_redirect_uri(self):
         """Get the redirect URI"""
