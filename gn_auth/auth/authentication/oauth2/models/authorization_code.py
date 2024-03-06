@@ -68,11 +68,16 @@ def authorisation_code(conn: db.DbConnection ,
         result = cursor.fetchone()
         if result:
             return Just(AuthorisationCode(
-                UUID(result["code_id"]), result["code"], client,
-                result["redirect_uri"], result["scope"], result["nonce"],
-                int(result["auth_time"]), result["code_challenge"],
-                result["code_challenge_method"],
-                user_by_id(conn, UUID(result["user_id"]))))
+                code_id=UUID(result["code_id"]),
+                code=result["code"],
+                client=client,
+                redirect_uri=result["redirect_uri"],
+                scope=result["scope"],
+                nonce=result["nonce"],
+                auth_time=int(result["auth_time"]),
+                code_challenge=result["code_challenge"],
+                code_challenge_method=result["code_challenge_method"],
+                user=user_by_id(conn, UUID(result["user_id"]))))
         return Nothing
 
 def save_authorisation_code(conn: db.DbConnection,

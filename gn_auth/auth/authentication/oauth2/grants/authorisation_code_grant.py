@@ -31,11 +31,21 @@ class AuthorisationCodeGrant(grants.AuthorizationCodeGrant):
         client = request.client
         nonce = "".join(random.sample(string.ascii_letters + string.digits,
                                       k=self.AUTHORIZATION_CODE_LENGTH))
-        return __save_authorization_code__(AuthorisationCode(
-            uuid.uuid4(), code, client, request.redirect_uri, request.scope,
-            nonce, int(datetime.now().timestamp()),
-            create_s256_code_challenge(app.config["SECRET_KEY"]),
-            "S256", request.user))
+        return __save_authorization_code__(
+            AuthorisationCode(
+                code_id=uuid.uuid4(),
+                code=code,
+                client=client,
+                redirect_uri=request.redirect_uri,
+                scope=request.scope,
+                nonce=nonce,
+                auth_time=int(datetime.now().timestamp()),
+                code_challenge=create_s256_code_challenge(
+                    app.config["SECRET_KEY"]
+                ),
+                code_challenge_method="S256",
+                user=request.user)
+        )
 
     def query_authorization_code(self, code, client):
         """Retrieve the code from the database."""
