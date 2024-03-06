@@ -3,6 +3,7 @@ from uuid import UUID
 from datetime import datetime
 from typing import NamedTuple
 
+from pymonad.tools import monad_from_none_or_value
 from pymonad.maybe import Just, Maybe, Nothing
 
 from gn_auth.auth.db import sqlite3 as db
@@ -67,9 +68,11 @@ def authorisation_code(conn: db.DbConnection ,
                  "WHERE code=:code AND client_id=:client_id")
         cursor.execute(
             query, {"code": code, "client_id": str(client.client_id)})
-        result = cursor.fetchone()
-        if result:
-            return Just(AuthorisationCode(
+
+        return monad_from_none_or_value(
+            Nothing, Just, cursor.fetchone()
+        ).then(
+            lambda result: AuthorisationCode(
                 code_id=UUID(result["code_id"]),
                 code=result["code"],
                 client=client,
@@ -80,7 +83,6 @@ def authorisation_code(conn: db.DbConnection ,
                 code_challenge=result["code_challenge"],
                 code_challenge_method=result["code_challenge_method"],
                 user=user_by_id(conn, UUID(result["user_id"]))))
-        return Nothing
 
 def save_authorisation_code(conn: db.DbConnection,
                             auth_code: AuthorisationCode) -> AuthorisationCode:
