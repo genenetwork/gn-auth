@@ -17,10 +17,17 @@ def query_token(# pylint: disable=[unused-argument]
         return val
     token = Nothing
     with db.connection(current_app.config["AUTH_DB"]) as conn:
-        if token_type_hint == "access_token":
-            token = token_by_access_token(conn, token_str)
-        if token_type_hint == "access_token":
-            token = token_by_refresh_token(conn, token_str)
+        match token_type_hint:
+            case "access_token":
+                token = token_by_access_token(
+                    conn, token_str
+                )
+            case "refresh_token":
+                token = token_by_refresh_token(
+                    conn, token_str
+                )
+            case _:
+                token = Nothing
 
         return token.maybe(
             token_by_access_token(conn, token_str).maybe(
