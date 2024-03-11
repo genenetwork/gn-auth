@@ -25,10 +25,10 @@ def create_query_client_func() -> Callable:
         # use current_app rather than passing the db_uri to avoid issues
         # when config changes, e.g. while testing.
         with db.connection(current_app.config["AUTH_DB"]) as conn:
-            the_client = client(conn, client_id).maybe(
+            _client = client(conn, client_id).maybe(
                 None, lambda clt: clt) # type: ignore[misc]
-            if bool(the_client):
-                return the_client
+            if bool(_client):
+                return _client
             raise InvalidClientError(
                 "No client found for the given CLIENT_ID and CLIENT_SECRET.")
 
