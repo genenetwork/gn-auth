@@ -24,12 +24,13 @@ class IntrospectionEndpoint(_IntrospectionEndpoint):
         """Query the token."""
         return _query_token(self, token_string, token_type_hint)
 
-    def introspect_token(self, token: OAuth2Token) -> dict:# pylint: disable=[no-self-use]
+    # pylint: disable=[no-self-use]
+    def introspect_token(self, token: OAuth2Token) -> dict:
         """Return the introspection information."""
         url = urlparse(flask_request.url)
         return {
             "active": True,
-            "scope": token.get_scope(),
+            "scope": token.scope,
             "client_id": token.client.client_id,
             "username": token.user.name,
             "token_type": token.token_type,

@@ -1,19 +1,24 @@
 """OAuth2 Token"""
 import uuid
 import datetime
-from typing import NamedTuple, Optional
+from dataclasses import dataclass
+from functools import cached_property
+from typing import Optional
 
+from authlib.oauth2.rfc6749 import TokenMixin
 from pymonad.tools import monad_from_none_or_value
 from pymonad.maybe import Just, Maybe, Nothing
 
 from gn_auth.auth.db import sqlite3 as db
 from gn_auth.auth.authentication.users import User, user_by_id
-
 from gn_auth.auth.authorisation.errors import NotFoundError
 
 from .oauth2client import client, OAuth2Client
 
-class OAuth2Token(NamedTuple):
+
+# pylint: disable=[too-many-instance-attributes]
+@dataclass(frozen=True)
+class OAuth2Token(TokenMixin):
     """Implement Tokens for OAuth2."""
     token_id: uuid.UUID
     client: OAuth2Client
@@ -26,12 +31,13 @@ class OAuth2Token(NamedTuple):
     expires_in: int
     user: User
 
-    @property
-    def expires_at(self) -> datetime.datetime:
+    @cached_property
+    def expires_at(self):
         """Return the time when the token expires."""
         return self.issued_at + datetime.timedelta(seconds=self.expires_in)
 
-    def check_client(self, client: OAuth2Client) -> bool:# pylint: disable=[redefined-outer-name]
+    # pylint: disable=[redefined-outer-name]
+    def check_client(self, client: OAuth2Client) -> bool:
         """Check whether the token is issued to given `client`."""
         return client.client_id == self.client.client_id
 
