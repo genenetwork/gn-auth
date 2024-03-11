@@ -2,13 +2,12 @@
 import traceback
 from typing import Any
 from functools import partial
-
+from dataclasses import asdict
 import sqlite3
 from email_validator import validate_email, EmailNotValidError
 from flask import request, jsonify, Response, Blueprint, current_app
 
 from gn_auth.auth.db import sqlite3 as db
-from gn_auth.auth.dictify import dictify
 from gn_auth.auth.db.sqlite3 import with_db_connection
 
 from gn_auth.auth.authorisation.resources.models import (
@@ -48,7 +47,7 @@ def user_details() -> Response:
                 False, lambda grp: grp)# type: ignore[arg-type]
             return jsonify({
                 **user_dets,
-                "group": dictify(the_group) if the_group else False
+                "group": asdict(the_group) if the_group else False
             })
 
 @users.route("/roles", methods=["GET"])
@@ -134,7 +133,7 @@ def user_group() -> Response:
                 False, lambda grp: grp)# type: ignore[arg-type]
 
         if group:
-            return jsonify(dictify(group))
+            return jsonify(asdict(group))
         raise NotFoundError("User is not a member of any group.")
 
 @users.route("/resources", methods=["GET"])

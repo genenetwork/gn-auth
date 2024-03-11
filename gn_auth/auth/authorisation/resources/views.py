@@ -193,9 +193,9 @@ def resource_users(resource_id: uuid.UUID):
                 "users.")
         results = (
             {
-                "user_group": dictify(row["user_group"]),
                 "roles": tuple(dictify(role) for role in row["roles"])
                 "user": asdict(row["user"]),
+                "user_group": asdict(row["user_group"]),
             } for row in (
                 user_row for user_id, user_row
                 in with_db_connection(__the_users__).items()))

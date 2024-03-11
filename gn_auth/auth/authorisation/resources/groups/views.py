@@ -6,13 +6,13 @@ import datetime
 from typing import Iterable
 from functools import partial
 
+from dataclasses import asdict
 from MySQLdb.cursors import DictCursor
 from flask import request, jsonify, Response, Blueprint, current_app
 
 from gn_auth.auth.db import sqlite3 as db
 from gn_auth.auth.db import mariadb as gn3db
 from gn_auth.auth.db.sqlite3 import with_db_connection
-from gn_auth.auth.dictify import dictify
 
 from gn_auth.auth.authorisation.roles.models import Role
 from gn_auth.auth.authorisation.roles.models import user_roles
@@ -42,7 +42,7 @@ def list_groups():
         the_groups = all_groups(conn)
 
     return jsonify(the_groups.maybe(
-        [], lambda grps: [dictify(grp) for grp in grps]))
+        [], lambda grps: [asdict(grp) for grp in grps]))
 
 @groups.route("/create", methods=["POST"])
 @require_oauth("profile group")
@@ -59,7 +59,7 @@ def create_group():
             new_group = _create_group(
                 conn, group_name, user, request.form.get("group_description"))
             return jsonify({
-                **dictify(new_group), "group_leader": asdict(user)
+                **asdict(new_group), "group_leader": asdict(user)
             })
 
 @groups.route("/members/<uuid:group_id>", methods=["GET"])

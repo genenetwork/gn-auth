@@ -1,5 +1,6 @@
 """Handle linking of Phenotype data to the Auth(entic|oris)ation system."""
 import uuid
+from dataclasses import asdict
 from typing import Any, Iterable
 
 from MySQLdb.cursors import DictCursor
@@ -136,6 +137,6 @@ def link_phenotype_data(
         return {
             "description": (
                 f"Successfully linked {len(traits)} traits to group."),
-            "group": dictify(group),
+            "group": asdict(group),
             "traits": params
         }

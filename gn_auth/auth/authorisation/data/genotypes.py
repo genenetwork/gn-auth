@@ -1,5 +1,6 @@
 """Handle linking of Genotype data to the Auth(entic|oris)ation system."""
 import uuid
+from dataclasses import asdict
 from typing import Iterable
 
 from MySQLdb.cursors import DictCursor
@@ -92,6 +93,6 @@ def link_genotype_data(
             "description": (
                 f"Successfully linked {len(datasets)} to group "
                 f"'{group.group_name}'."),
-            "group": dictify(group),
+            "group": asdict(group),
             "datasets": datasets
         }

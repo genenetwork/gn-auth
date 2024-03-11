@@ -2,6 +2,7 @@
 import json
 from uuid import UUID, uuid4
 from functools import reduce
+from dataclasses import dataclass
 from typing import Any, Sequence, Iterable, Optional, NamedTuple
 
 from flask import g
@@ -21,18 +22,14 @@ from gn_auth.auth.authorisation.roles.models import (
     Role, create_role, check_user_editable, revoke_user_role_by_name,
     assign_user_role_by_name)
 
-class Group(NamedTuple):
+
+@dataclass(frozen=True)
+class Group:
     """Class representing a group."""
     group_id: UUID
     group_name: str
     group_metadata: dict[str, Any]
 
-    def dictify(self):
-        """Return a dict representation of `Group` objects."""
-        return {
-            "group_id": self.group_id, "group_name": self.group_name,
-            "group_metadata": self.group_metadata
-        }
 
 DUMMY_GROUP = Group(
     group_id=UUID("77cee65b-fe29-4383-ae41-3cb3b480cc70"),
@@ -50,8 +47,8 @@ class GroupRole(NamedTuple):
     def dictify(self) -> dict[str, Any]:
         """Return a dict representation of `GroupRole` objects."""
         return {
-            "group_role_id": self.group_role_id, "group": dictify(self.group),
             "role": dictify(self.role)
+            "group_role_id": self.group_role_id, "group": asdict(self.group),
         }
 
 class GroupCreationError(AuthorisationError):
