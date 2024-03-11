@@ -1,7 +1,10 @@
 """Model and functions for handling the Authorisation Code"""
-from uuid import UUID
 from datetime import datetime
-from typing import NamedTuple
+from dataclasses import dataclass, asdict
+from functools import cached_property
+from uuid import UUID
+from authlib.oauth2.rfc6749 import AuthorizationCodeMixin
+
 
 from pymonad.tools import monad_from_none_or_value
 from pymonad.maybe import Just, Maybe, Nothing
@@ -16,11 +19,12 @@ from ...users import User, user_by_id
 EXPIRY_IN_SECONDS = 300  # in seconds
 
 
-class AuthorisationCode(NamedTuple):
+# pylint: disable=[too-many-instance-attributes]
+@dataclass(frozen=True)
+class AuthorisationCode(AuthorizationCodeMixin):
     """
     The AuthorisationCode model for the auth(entic|oris)ation system.
     """
-    # Instance variables
     code_id: UUID
     code: str
     client: OAuth2Client
@@ -32,7 +36,7 @@ class AuthorisationCode(NamedTuple):
     code_challenge_method: str
     user: User
 
-    @property
+    @cached_property
     def response_type(self) -> str:
         """
         For authorisation code flow, the response_type type MUST always be
@@ -52,9 +56,6 @@ class AuthorisationCode(NamedTuple):
         """Return the assigned scope for this AuthorisationCode."""
         return self.scope
 
-    def get_nonce(self):
-        """Get the one-time use token."""
-        return self.nonce
 
 def authorisation_code(conn: db.DbConnection ,
                        code: str,
@@ -94,7 +95,7 @@ def save_authorisation_code(conn: db.DbConnection,
             ":auth_time, :code_challenge, :code_challenge_method, :user_id"
             ")",
             {
-                **auth_code._asdict(),
+                **asdict(auth_code),
                 "code_id": str(auth_code.code_id),
                 "client_id": str(auth_code.client.client_id),
                 "user_id": str(auth_code.user.user_id)
