@@ -1,20 +1,17 @@
 """Handle privileges"""
-from typing import Any, Iterable, NamedTuple
+from dataclasses import dataclass
+from typing import Any, Iterable
 
 from ..db import sqlite3 as db
 from ..authentication.users import User
 
-class Privilege(NamedTuple):
+
+@dataclass(frozen=True)
+class Privilege:
     """Class representing a privilege: creates immutable objects."""
     privilege_id: str
     privilege_description: str
 
-    def dictify(self) -> dict[str, Any]:
-        """Return a dict representation of `Privilege` objects."""
-        return {
-            "privilege_id": self.privilege_id,
-            "privilege_description": self.privilege_description
-        }
 
 def user_privileges(conn: db.DbConnection, user: User) -> Iterable[Privilege]:
     """Fetch the user's privileges from the database."""

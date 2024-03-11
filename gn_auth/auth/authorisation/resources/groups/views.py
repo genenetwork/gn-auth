@@ -5,8 +5,8 @@ import uuid
 import datetime
 from typing import Iterable
 from functools import partial
-
 from dataclasses import asdict
+
 from MySQLdb.cursors import DictCursor
 from flask import request, jsonify, Response, Blueprint, current_app
 
@@ -331,7 +331,7 @@ def group_privileges():
                 privilege for arole in this_user_roles
                 for privilege in arole.privileges) + group_level_roles #type: ignore[attr-defined]
         return jsonify(tuple(
-            dictify(priv) for priv in with_db_connection(__list_privileges__)))
+            asdict(priv) for priv in with_db_connection(__list_privileges__)))
 
 
 
@@ -420,7 +420,7 @@ def add_priv_to_role(group_role_id: uuid.UUID) -> Response:
     """Add privilege to group role."""
     with require_oauth.acquire("profile group role") as the_token:
         return jsonify({
-            **dictify(with_db_connection(partial(
+            **asdict(with_db_connection(partial(
                 __add_remove_priv_to_from_role__, group_role_id=group_role_id,
                 direction="ADD", user=the_token.user))),
             "description": "Privilege added successfully"
@@ -432,7 +432,7 @@ def delete_priv_from_role(group_role_id: uuid.UUID) -> Response:
     """Delete privilege from group role."""
     with require_oauth.acquire("profile group role") as the_token:
         return jsonify({
-            **dictify(with_db_connection(partial(
+            **asdict(with_db_connection(partial(
                 __add_remove_priv_to_from_role__, group_role_id=group_role_id,
                 direction="DELETE", user=the_token.user))),
             "description": "Privilege deleted successfully"

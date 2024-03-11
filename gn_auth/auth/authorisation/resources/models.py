@@ -343,7 +343,7 @@ def assign_resource_user(
         return {
             "resource": dictify(resource),
             "user": asdict(user),
-            "role": dictify(role),
+            "role": asdict(role),
             "description": (
                 f"The user '{user.name}'({user.email}) was assigned the "
                 f"'{role.role.role_name}' role on resource with ID "
@@ -367,7 +367,7 @@ def unassign_resource_user(
         return {
             "resource": dictify(resource),
             "user": asdict(user),
-            "role": dictify(role),
+            "role": asdict(role),
             "description": (
                 f"The user '{user.name}'({user.email}) had the "
                 f"'{role.role.role_name}' role on resource with ID "

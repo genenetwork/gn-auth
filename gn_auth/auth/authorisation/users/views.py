@@ -57,7 +57,7 @@ def user_roles() -> Response:
     with require_oauth.acquire("role") as token:
         with db.connection(current_app.config["AUTH_DB"]) as conn:
             return jsonify(tuple(
-                {**role, "roles": tuple(dictify(rol) for rol in role["roles"])}
+                {**role, "roles": tuple(asdict(rol) for rol in role["roles"])}
                 for role in _user_roles(conn, token.user)))
 
 def validate_password(password, confirm_password) -> str:

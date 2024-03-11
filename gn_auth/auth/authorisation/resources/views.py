@@ -193,9 +193,9 @@ def resource_users(resource_id: uuid.UUID):
                 "users.")
         results = (
             {
-                "roles": tuple(dictify(role) for role in row["roles"])
                 "user": asdict(row["user"]),
                 "user_group": asdict(row["user_group"]),
+                "roles": tuple(asdict(role) for role in row["roles"])
             } for row in (
                 user_row for user_id, user_row
                 in with_db_connection(__the_users__).items()))
@@ -347,7 +347,7 @@ def resources_authorisation():
                 str(resid): {
                     "public-read": resid in pubres,
                     "roles": tuple(
-                        dictify(rol) for rol in
+                        asdict(rol) for rol in
                         the_resources.get(resid, {}).get("roles", tuple()))
                 } for resid in resource_ids
             })

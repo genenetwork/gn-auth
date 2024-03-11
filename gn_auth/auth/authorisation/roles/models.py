@@ -3,30 +3,26 @@ from uuid import UUID, uuid4
 from functools import reduce
 from typing import Any, Sequence, Iterable, NamedTuple
 
+from typing import Any, Sequence, Iterable
+
 from pymonad.either import Left, Right, Either
 
 from ...db import sqlite3 as db
-from ...dictify import dictify
 from ...authentication.users import User
 
 from ..checks import authorised_p
 from ..privileges import Privilege
 from ..errors import NotFoundError, AuthorisationError
 
-class Role(NamedTuple):
+
+@dataclass(frozen=True)
+class Role:
     """Class representing a role: creates immutable objects."""
     role_id: UUID
     role_name: str
     user_editable: bool
     privileges: tuple[Privilege, ...]
 
-    def dictify(self) -> dict[str, Any]:
-        """Return a dict representation of `Role` objects."""
-        return {
-            "role_id": self.role_id, "role_name": self.role_name,
-            "user_editable": self.user_editable,
-            "privileges": tuple(dictify(priv) for priv in self.privileges)
-        }
 
 def check_user_editable(role: Role):
     """Raise an exception if `role` is not user editable."""
