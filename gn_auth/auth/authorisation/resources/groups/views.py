@@ -308,7 +308,7 @@ def group_roles():
                                    tuple()))
                     for row in cursor.fetchall())
         return jsonify(tuple(
-            dictify(role) for role in with_db_connection(__list_roles__)))
+            asdict(role) for role in with_db_connection(__list_roles__)))
 
 @groups.route("/privileges", methods=["GET"])
 @require_oauth("profile group")
@@ -384,7 +384,7 @@ def view_group_role(group_role_id: uuid.UUID):
                 raise AuthorisationError(
                     "A user without a group cannot view group roles.")
             return group_role_by_id(conn, group, group_role_id)
-        return jsonify(dictify(with_db_connection(__group_role__)))
+        return jsonify(asdict(with_db_connection(__group_role__)))
 
 def __add_remove_priv_to_from_role__(conn: db.DbConnection,
                                      group_role_id: uuid.UUID,

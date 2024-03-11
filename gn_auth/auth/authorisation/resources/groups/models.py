@@ -2,14 +2,13 @@
 import json
 from uuid import UUID, uuid4
 from functools import reduce
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from typing import Any, Sequence, Iterable, Optional, NamedTuple
 
 from flask import g
 from pymonad.maybe import Just, Maybe, Nothing
 
 from gn_auth.auth.db import sqlite3 as db
-from gn_auth.auth.dictify import dictify
 from gn_auth.auth.authentication.users import User, user_by_id
 
 from gn_auth.auth.authorisation.checks import authorised_p
@@ -38,18 +37,14 @@ DUMMY_GROUP = Group(
         "group-description": "This is a dummy group to use as a placeholder"
     })
 
-class GroupRole(NamedTuple):
+
+@dataclass(frozen=True)
+class GroupRole:
     """Class representing a role tied/belonging to a group."""
     group_role_id: UUID
     group: Group
     role: Role
 
-    def dictify(self) -> dict[str, Any]:
-        """Return a dict representation of `GroupRole` objects."""
-        return {
-            "role": dictify(self.role)
-            "group_role_id": self.group_role_id, "group": asdict(self.group),
-        }
 
 class GroupCreationError(AuthorisationError):
     """Raised whenever a group creation fails"""
