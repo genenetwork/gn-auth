@@ -1,6 +1,6 @@
 """Handle privileges"""
 from dataclasses import dataclass
-from typing import Any, Iterable
+from typing import Iterable
 
 from ..db import sqlite3 as db
 from ..authentication.users import User

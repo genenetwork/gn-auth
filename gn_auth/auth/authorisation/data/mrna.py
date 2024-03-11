@@ -4,7 +4,6 @@ from dataclasses import asdict
 from typing import Iterable
 from MySQLdb.cursors import DictCursor
 
-from gn_auth.auth.dictify import dictify
 from gn_auth.auth.db import sqlite3 as authdb
 from gn_auth.auth.db import mariadb as gn3db
 

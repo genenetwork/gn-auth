@@ -1,7 +1,7 @@
 """Handle management of roles"""
 from uuid import UUID, uuid4
 from functools import reduce
-from typing import Any, Sequence, Iterable, NamedTuple
+from dataclasses import dataclass, asdict
 
 from typing import Any, Sequence, Iterable
 
