@@ -6,7 +6,6 @@ from sqlite3 import Row
 from typing import Dict, Sequence, Optional
 
 from gn_auth.auth.db import sqlite3 as db
-from gn_auth.auth.dictify import dictify
 from gn_auth.auth.authentication.users import User
 from gn_auth.auth.db.sqlite3 import with_db_connection
 
@@ -341,7 +340,7 @@ def assign_resource_user(
             (str(user.user_id), str(role.role.role_id),
              str(resource.resource_id)))
         return {
-            "resource": dictify(resource),
+            "resource": asdict(resource),
             "user": asdict(user),
             "role": asdict(role),
             "description": (
@@ -365,7 +364,7 @@ def unassign_resource_user(
              str(role.role.role_id),
              str(resource.resource_id)))
         return {
-            "resource": dictify(resource),
+            "resource": asdict(resource),
             "user": asdict(user),
             "role": asdict(role),
             "description": (

@@ -2,6 +2,8 @@
 import uuid
 import json
 import sqlite3
+
+from dataclasses import asdict
 from functools import reduce
 
 from authlib.integrations.flask_oauth2.errors import _HTTPException
@@ -13,7 +15,6 @@ from gn_auth.auth.db.sqlite3 import with_db_connection
 from gn_auth.auth.authorisation.roles import Role
 from gn_auth.auth.authorisation.errors import InvalidData, InconsistencyError, AuthorisationError
 
-from gn_auth.auth.dictify import dictify
 from gn_auth.auth.authentication.oauth2.resource_server import require_oauth
 from gn_auth.auth.authentication.users import User, user_by_id, user_by_email
 
@@ -34,7 +35,7 @@ def list_resource_categories() -> Response:
     db_uri = app.config["AUTH_DB"]
     with db.connection(db_uri) as conn:
         return jsonify(tuple(
-            dictify(category) for category in resource_categories(conn)))
+            asdict(category) for category in resource_categories(conn)))
 
 @resources.route("/create", methods=["POST"])
 @require_oauth("profile group resource")
@@ -53,7 +54,7 @@ def create_resource() -> Response:
                     resource_category_by_id(conn, resource_category_id),
                     the_token.user,
                     (form.get("public") == "on"))
-                return jsonify(dictify(resource))
+                return jsonify(asdict(resource))
             except sqlite3.IntegrityError as sql3ie:
                 if sql3ie.args[0] == ("UNIQUE constraint failed: "
                                       "resources.resource_name"):
@@ -70,8 +71,11 @@ def view_resource(resource_id: uuid.UUID) -> Response:
     with require_oauth.acquire("profile group resource") as the_token:
         db_uri = app.config["AUTH_DB"]
         with db.connection(db_uri) as conn:
-            return jsonify(dictify(resource_by_id(
-                conn, the_token.user, resource_id)))
+            return jsonify(
+                asdict(
+                    resource_by_id(conn, the_token.user, resource_id)
+                )
+            )
 
 def __safe_get_requests_page__(key: str = "page") -> int:
     """Get the results page if it exists or default to the first page."""
@@ -325,7 +329,7 @@ def toggle_public(resource_id: uuid.UUID) -> Response:
 
         resource = with_db_connection(__toggle__)
         return jsonify({
-            "resource": dictify(resource),
+            "resource": asdict(resource),
             "description": (
                 "Made resource public" if resource.public
                 else "Made resource private")})

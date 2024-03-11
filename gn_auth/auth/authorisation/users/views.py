@@ -144,7 +144,7 @@ def user_resources() -> Response:
         db_uri = current_app.config["AUTH_DB"]
         with db.connection(db_uri) as conn:
             return jsonify([
-                dictify(resource) for resource in
+                asdict(resource) for resource in
                 _user_resources(conn, the_token.user)])
 
 @users.route("group/join-request", methods=["GET"])
