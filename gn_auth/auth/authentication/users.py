@@ -1,6 +1,7 @@
 """User-specific code and data structures."""
 from uuid import UUID, uuid4
-from typing import Any, Tuple, NamedTuple
+from typing import Tuple
+from dataclasses import dataclass
 
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
@@ -8,19 +9,14 @@ from argon2.exceptions import VerifyMismatchError
 from gn_auth.auth.db import sqlite3 as db
 from gn_auth.auth.authorisation.errors import NotFoundError
 
-class User(NamedTuple):
+
+@dataclass(frozen=True)
+class User:
     """Class representing a user."""
     user_id: UUID
     email: str
     name: str
 
-    def get_user_id(self):
-        """Return the user's UUID. Mostly for use with Authlib."""
-        return self.user_id
-
-    def dictify(self) -> dict[str, Any]:
-        """Return a dict representation of `User` objects."""
-        return {"user_id": self.user_id, "email": self.email, "name": self.name}
 
 DUMMY_USER = User(user_id=UUID("a391cf60-e8b7-4294-bd22-ddbbda4b3530"),
                   email="gn3@dummy.user",

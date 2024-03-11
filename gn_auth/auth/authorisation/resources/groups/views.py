@@ -59,7 +59,7 @@ def create_group():
             new_group = _create_group(
                 conn, group_name, user, request.form.get("group_description"))
             return jsonify({
-                **dictify(new_group), "group_leader": dictify(user)
+                **dictify(new_group), "group_leader": asdict(user)
             })
 
 @groups.route("/members/<uuid:group_id>", methods=["GET"])
@@ -71,7 +71,7 @@ def group_members(group_id: uuid.UUID) -> Response:
         ## Check that user has appropriate privileges and remove the pylint disable above
         with db.connection(db_uri) as conn:
             return jsonify(tuple(
-                dictify(user) for user in _group_users(conn, group_id)))
+                asdict(user) for user in _group_users(conn, group_id)))
 
 @groups.route("/requests/join/<uuid:group_id>", methods=["POST"])
 @require_oauth("profile group")

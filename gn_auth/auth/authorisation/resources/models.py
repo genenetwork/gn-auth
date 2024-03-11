@@ -1,4 +1,5 @@
 """Handle the management of resources."""
+from dataclasses import asdict
 from uuid import UUID, uuid4
 from functools import reduce, partial
 from sqlite3 import Row
@@ -341,7 +342,7 @@ def assign_resource_user(
              str(resource.resource_id)))
         return {
             "resource": dictify(resource),
-            "user": dictify(user),
+            "user": asdict(user),
             "role": dictify(role),
             "description": (
                 f"The user '{user.name}'({user.email}) was assigned the "
@@ -365,7 +366,7 @@ def unassign_resource_user(
              str(resource.resource_id)))
         return {
             "resource": dictify(resource),
-            "user": dictify(user),
+            "user": asdict(user),
             "role": dictify(role),
             "description": (
                 f"The user '{user.name}'({user.email}) had the "

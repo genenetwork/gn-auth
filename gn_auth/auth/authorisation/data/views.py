@@ -2,6 +2,7 @@
 import sys
 import uuid
 import json
+from dataclasses import asdict
 from typing import Any
 from functools import partial
 
@@ -152,7 +153,7 @@ def authorisation() -> Response:
 
         return jsonify(tuple(
             {
-                "user": user._asdict(),
+                "user": asdict(user),
                 **{key:trait[key] for key in ("trait_fullname", "trait_name")},
                 "dataset_name": trait["db"]["dataset_name"],
                 "dataset_type": __translate__(trait["db"]["dataset_type"]),
@@ -377,7 +378,7 @@ def metadata_resources() -> Response:
             }
             return jsonify(
                 {
-                    "user": user._asdict(),
+                    "user": asdict(user),
                     "resource_id": resource_map.get(
                         request.json.get("name")  #type: ignore[union-attr]
                     ),

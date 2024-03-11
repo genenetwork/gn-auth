@@ -178,4 +178,4 @@ def list_all_users() -> Response:
     """List all the users."""
     with require_oauth.acquire("profile group") as _the_token:
         return jsonify(tuple(
-            dictify(user) for user in with_db_connection(list_users)))
+            asdict(user) for user in with_db_connection(list_users)))

@@ -1,4 +1,5 @@
 """Endpoints for user masquerade"""
+from dataclasses import asdict
 from uuid import UUID
 from functools import partial
 
@@ -42,7 +43,7 @@ def masquerade() -> Response:
                 "token": __dump_token__(token)
             },
             "masquerade_as": {
-                "user": masq_user._asdict(),
+                "user": asdict(masq_user),
                 "token": __dump_token__(with_db_connection(__masq__))
             }
         })
