@@ -1,9 +1,9 @@
 """Handle management of roles"""
 from uuid import UUID, uuid4
 from functools import reduce
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 
-from typing import Any, Sequence, Iterable
+from typing import Sequence, Iterable
 
 from pymonad.either import Left, Right, Either
 

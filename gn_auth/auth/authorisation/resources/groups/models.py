@@ -2,7 +2,7 @@
 import json
 from uuid import UUID, uuid4
 from functools import reduce
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from typing import Any, Sequence, Iterable, Optional
 
 from flask import g

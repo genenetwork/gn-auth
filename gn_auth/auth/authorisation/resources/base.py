@@ -1,6 +1,6 @@
 """Base types for resources."""
 from uuid import UUID
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from typing import Any, Sequence
 
 
