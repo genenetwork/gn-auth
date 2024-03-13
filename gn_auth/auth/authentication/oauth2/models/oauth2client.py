@@ -12,7 +12,7 @@ from pymonad.maybe import Just, Maybe, Nothing
 
 from gn_auth.auth.db import sqlite3 as db
 from gn_auth.auth.authentication.users import (User,
-                                               users,
+                                               fetch_users,
                                                user_by_id,
                                                same_password)
 
@@ -236,7 +236,7 @@ def oauth2_clients(conn: db.DbConnection) -> tuple[OAuth2Client, ...]:
         cursor.execute("SELECT * FROM oauth2_clients")
         clients_rs = cursor.fetchall()
         the_users = {
-            usr.user_id: usr for usr in users(
+            usr.user_id: usr for usr in fetch_users(
                 conn, tuple({UUID(result["user_id"])
                              for result in clients_rs}))
         }

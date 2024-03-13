@@ -107,7 +107,7 @@ def set_user_password(
         {"user_id": str(user.user_id), "hash": hashed_password})
     return user, hashed_password
 
-def users(conn: db.DbConnection,
+def fetch_users(conn: db.DbConnection,
           ids: tuple[UUID, ...] = tuple()) -> tuple[User, ...]:
     """
     Fetch all users with the given `ids`. If `ids` is empty, return ALL users.
