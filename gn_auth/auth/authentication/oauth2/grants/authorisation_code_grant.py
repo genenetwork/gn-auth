@@ -82,8 +82,9 @@ def __query_authorization_code__(
     This is found to be necessary since the `AuthorizationCodeGrant` class(es)
     do not have a way to pass the database connection."""
     def __auth_code__(conn) -> str:
-        the_code = authorisation_code(conn, code, client)
-        return the_code.maybe(None, lambda cde: cde) # type: ignore[misc, arg-type, return-value]
+        _code = authorisation_code(conn, code, client)
+        # type: ignore[misc, arg-type, return-value]
+        return _code.maybe(None, lambda cde: cde)
 
     return with_db_connection(__auth_code__)
 
