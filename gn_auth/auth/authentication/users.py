@@ -117,7 +117,6 @@ def fetch_users(conn: db.DbConnection,
         query = "SELECT * FROM users" + (
             f" WHERE user_id IN ({params})"
             if len(ids) > 0 else "")
-        print(query)
         cursor.execute(query, tuple(str(the_id) for the_id in ids))
         return tuple(User(UUID(row["user_id"]), row["email"], row["name"])
                      for row in cursor.fetchall())
