@@ -88,11 +88,11 @@ def authorisation() -> Response:
     user = User(uuid.uuid4(), "anon@ymous.user", "Anonymous User")
     with db.connection(db_uri) as auth_conn:
         try:
-            with require_oauth.acquire("profile group resource") as the_token:
-                user = the_token.user
+            with require_oauth.acquire("profile group resource") as _token:
+                user = _token.user
                 resources = attach_resources_data(
-                    auth_conn, user_resources(auth_conn, the_token.user))
-                resources_roles = user_resource_roles(auth_conn, the_token.user)
+                    auth_conn, user_resources(auth_conn, _token.user))
+                resources_roles = user_resource_roles(auth_conn, _token.user)
                 privileges = {
                     resource_id: tuple(
                         privilege.privilege_id
@@ -100,7 +100,7 @@ def authorisation() -> Response:
                         for privilege in roles.privileges)#("group:resource:view-resource",)
                     for resource_id, is_authorised
                     in authorised_for(
-                        auth_conn, the_token.user,
+                        auth_conn, _token.user,
                         ("group:resource:view-resource",), tuple(
                             resource.resource_id for resource in resources)).items()
                     if is_authorised

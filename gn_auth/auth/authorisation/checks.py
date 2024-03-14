@@ -32,21 +32,21 @@ def authorised_p(
         privileges: tuple[str, ...],
         error_description: str = (
             "You lack authorisation to perform requested action"),
-        oauth2_scope = "profile"):
+        oauth2_scope="profile"):
     """Authorisation decorator."""
     assert len(privileges) > 0, "You must provide at least one privilege"
     def __build_authoriser__(func: Callable):
         @wraps(func)
         def __authoriser__(*args, **kwargs):
-            with require_oauth.acquire(oauth2_scope) as the_token:
-                the_user = the_token.user
-                if the_user:
+            with require_oauth.acquire(oauth2_scope) as _token:
+                _user = _token.user
+                if _user:
                     with db.connection(app.config["AUTH_DB"]) as conn:
                         user_privileges = tuple(
                             priv.privilege_id for priv in
-                            auth_privs.user_privileges(conn, the_user)) + tuple(
+                            auth_privs.user_privileges(conn, _user)) + tuple(
                                 priv_id for priv_id in
-                                __system_privileges_in_roles__(conn, the_user))
+                                __system_privileges_in_roles__(conn, _user))
 
                     not_assigned = [
                         priv for priv in privileges if priv not in user_privileges]
