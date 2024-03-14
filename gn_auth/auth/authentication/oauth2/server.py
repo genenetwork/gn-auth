@@ -6,7 +6,6 @@ from typing import Callable
 from flask import Flask, current_app
 from authlib.oauth2.rfc6749.errors import InvalidClientError
 from authlib.integrations.flask_oauth2 import AuthorizationServer
-# from authlib.oauth2.rfc7636 import CodeChallenge
 
 from gn_auth.auth.db import sqlite3 as db
 
