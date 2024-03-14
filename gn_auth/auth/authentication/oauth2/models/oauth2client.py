@@ -148,13 +148,13 @@ def client(conn: db.DbConnection, client_id: UUID,
             "SELECT * FROM oauth2_clients WHERE client_id=?",
             (str(client_id),))
         result = cursor.fetchone()
-        the_user = user
+        _user = user
         if result:
-            if not bool(the_user):
+            if not bool(_user):
                 try:
-                    the_user = user_by_id(conn, result["user_id"])
+                    _user = user_by_id(conn, result["user_id"])
                 except NotFoundError:
-                    the_user = None
+                    _user = None
 
             return Just(
                 OAuth2Client(
@@ -167,7 +167,7 @@ def client(conn: db.DbConnection, client_id: UUID,
                         result["client_secret_expires_at"]
                     ),
                     client_metadata=json.loads(result["client_metadata"]),
-                    user=the_user)  # type: ignore[arg-type]
+                    user=_user)  # type: ignore[arg-type]
             )
     return Nothing
 
