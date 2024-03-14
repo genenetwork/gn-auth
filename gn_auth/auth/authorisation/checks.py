@@ -38,7 +38,6 @@ def authorised_p(
     def __build_authoriser__(func: Callable):
         @wraps(func)
         def __authoriser__(*args, **kwargs):
-            # the_user = user or (hasattr(g, "user") and g.user)
             with require_oauth.acquire(oauth2_scope) as the_token:
                 the_user = the_token.user
                 if the_user:
