@@ -39,5 +39,5 @@ __error_handlers__ = {
 }
 def register_error_handlers(app: Flask):
     """Register ALL defined error handlers"""
-    for klass, error_handler in __error_handlers__.items():
-        app.register_error_handler(klass, error_handler)
+    for class_, error_handler in __error_handlers__.items():
+        app.register_error_handler(class_, error_handler)
