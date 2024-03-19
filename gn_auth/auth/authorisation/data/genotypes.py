@@ -12,7 +12,7 @@ from gn_auth.auth.authorisation.checks import authorised_p
 from gn_auth.auth.authorisation.resources.groups.models import Group
 
 def linked_genotype_data(conn: authdb.DbConnection) -> Iterable[dict]:
-    """Retrive genotype data that is linked to user groups."""
+    """Retrieve genotype data that is linked to user groups."""
     with authdb.cursor(conn) as cursor:
         cursor.execute("SELECT * FROM linked_genotype_data")
         return (dict(row) for row in cursor.fetchall())
