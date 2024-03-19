@@ -2,7 +2,6 @@
 from dataclasses import asdict
 from uuid import UUID, uuid4
 from functools import reduce, partial
-from sqlite3 import Row
 from typing import Dict, Sequence, Optional
 
 from gn_auth.auth.db import sqlite3 as db
@@ -35,22 +34,6 @@ from .phenotype import (
     unlink_data_from_resource as phenotype_unlink_data_from_resource)
 
 from .errors import MissingGroupError
-
-
-def __metadata_resource_data__(
-        cursor: db.DbCursor,
-        resource_id: UUID,
-        offset: int = 0,
-        limit: Optional[int] = None
-) -> Sequence[Row]:
-    """Fetch metadata resources"""
-    cursor.execute(
-        (
-            ("SELECT * FROM metadata_resources as mt \
-WHERE mt.resource_id=?")
-            + (f" LIMIT {limit} OFFSET {offset}" if bool(limit) else "")),
-        (str(resource_id),))
-    return cursor.fetchall()
 
 def __assign_resource_owner_role__(cursor, resource, user, group):
     """Assign `user` the 'Resource Owner' role for `resource`."""
@@ -202,7 +185,6 @@ def resource_data(conn, resource, offset: int = 0, limit: Optional[int] = None) 
         "mrna": mrna_resource_data,
         "genotype": genotype_resource_data,
         "phenotype": phenotype_resource_data,
-        "metadata": __metadata_resource_data__,
         "system": lambda *args: tuple(),
         "group": lambda *args: tuple()
     }
@@ -309,7 +291,6 @@ def attach_resources_data(
         "mrna": mrna_attach_resources_data,
         "genotype": genotype_attach_resources_data,
         "phenotype": phenotype_attach_resources_data,
-        "metadata": lambda *args: [],
         "system": lambda *args: [],
         "group": lambda *args: [],
         "inbredset-group": lambda *args: []
