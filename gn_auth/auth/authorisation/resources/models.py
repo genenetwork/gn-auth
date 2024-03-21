@@ -420,3 +420,14 @@ def user_roles_on_resources(conn: db.DbConnection,
     with db.cursor(conn) as cursor:
         cursor.execute(query, params)
         return reduce(__organise__, cursor.fetchall(), {})
+
+
+def get_resource_id(conn: db.DbConnection, name: str) -> Optional[str]:
+    """Given a resource_name, return it's resource_id."""
+    with db.cursor(conn) as cursor:
+        cursor.execute(
+            "SELECT resource_id \
+FROM resources as r WHERE r.resource_name=?", (name, ))
+        if res := cursor.fetchone():
+            return res["resource_id"]
+    return None

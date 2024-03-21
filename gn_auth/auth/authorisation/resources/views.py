@@ -23,7 +23,8 @@ from .models import (
     Resource, resource_data, resource_by_id, public_resources,
     resource_categories, assign_resource_user, link_data_to_resource,
     unassign_resource_user, resource_category_by_id, user_roles_on_resources,
-    unlink_data_from_resource, create_resource as _create_resource)
+    unlink_data_from_resource, create_resource as _create_resource,
+    get_resource_id)
 from .groups.models import Group, resource_owner, group_role_by_id
 
 resources = Blueprint("resources", __name__)
@@ -372,3 +373,24 @@ def resources_authorisation():
         resp.status_code = 400
 
     return resp
+
+
+@resources.route("/authorisation/<name>", methods=["GET"])
+def get_user_roles_on_resource(name) -> Response:
+    """Get user authorisation for a given resource given it's name"""
+    resid = with_db_connection(
+        lambda conn: get_resource_id(conn, name)
+    )
+    with require_oauth.acquire("profile resource") as _token:
+        _resources = with_db_connection(
+            lambda conn: user_roles_on_resources(
+                conn, _token.user, (resid,)
+            )
+        )
+        return jsonify({
+                name: {
+                    "roles": tuple(
+                        asdict(rol) for rol in
+                        _resources.get(resid, {}).get("roles", tuple()))
+                }
+            })
