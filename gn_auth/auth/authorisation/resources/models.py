@@ -185,6 +185,9 @@ def resource_data(conn, resource, offset: int = 0, limit: Optional[int] = None) 
         "mrna": mrna_resource_data,
         "genotype": genotype_resource_data,
         "phenotype": phenotype_resource_data,
+        "phenotype-metadata": lambda *args: tuple(),
+        "genotype-metadata": lambda *args: tuple(),
+        "mrna-metadata": lambda *args: tuple(),
         "system": lambda *args: tuple(),
         "group": lambda *args: tuple()
     }
