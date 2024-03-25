@@ -1,6 +1,7 @@
 """The views/routes for the resources package"""
 import uuid
 import json
+import operator
 import sqlite3
 
 from dataclasses import asdict
@@ -381,16 +382,25 @@ def get_user_roles_on_resource(name) -> Response:
     resid = with_db_connection(
         lambda conn: get_resource_id(conn, name)
     )
+
+    def _extract_privilege_id(privileges):
+        return tuple(
+            p_.privilege_id for p_ in privileges
+        )
+
     with require_oauth.acquire("profile resource") as _token:
         _resources = with_db_connection(
             lambda conn: user_roles_on_resources(
                 conn, _token.user, (resid,)
             )
         )
+        _roles = tuple(
+            _extract_privilege_id(role.privileges)
+            for role in
+            _resources.get(
+                uuid.UUID(resid), {}
+            ).get("roles", tuple()))
         return jsonify({
-                name: {
-                    "roles": tuple(
-                        asdict(rol) for rol in
-                        _resources.get(resid, {}).get("roles", tuple()))
-                }
-            })
+            # Flatten this list
+            "roles": reduce(operator.iconcat, _roles, [])
+        })
